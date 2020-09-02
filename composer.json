@@ -10,7 +10,7 @@
         {
             "name": "HellBz",
             "email": "coding@hellbz.de",
-            "homepage": "https://www.hellbz.de",
+            "homepage": "https://www.hellbz.de"
         }
     ],
     "autoload": {
