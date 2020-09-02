@@ -5,13 +5,12 @@
     "keywords": ["teamspeak3"],
     "minimum-stability": "dev",
     "homepage": "https://github.com/HellBz/teamspeak-php-framework",
+    "license": "MIT",
     "authors": [
         {
-            "name": "Stefan K."
-        },
-        {
-            "name": "Frank Kubis",
-            "email": "f.kubis@aranox.de"
+            "name": "HellBz",
+            "email": "coding@hellbz.de",
+            "homepage": "https://www.hellbz.de",
         }
     ],
     "autoload": {
