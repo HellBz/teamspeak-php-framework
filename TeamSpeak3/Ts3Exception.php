@@ -23,14 +23,10 @@
  */
 
         
-namespace TeamSpeak3\Adapter;
+namespace TeamSpeak3;
 
-use TeamSpeak3\Ts3Exception;
-use TeamSpeak3\Transport\TCP;
-use TeamSpeak3\Transport\UDP;
-use TeamSpeak3\Transport\AbstractTransport;
-use TeamSpeak3\Helper\Profiler;
-use TeamSpeak3\Helper\Profiler\Timer;
+use TeamSpeak3\Helper\Signal;
+use TeamSpeak3\Helper\StringHelper;
 
 
 /**

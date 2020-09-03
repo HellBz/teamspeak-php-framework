@@ -32,7 +32,7 @@ use TeamSpeak3\TeamSpeak3;
  * @class Channel
  * @brief Class describing a TeamSpeak 3 channel and all it's parameters.
  */
-class class Channel extends AbstractNode
+class Channel extends AbstractNode
 {
   /**
    * The Channel constructor.
