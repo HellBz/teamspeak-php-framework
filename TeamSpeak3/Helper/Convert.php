@@ -22,12 +22,6 @@
  * @copyright Copyright (c) Planet TeamSpeak. All rights reserved.
  */
 
-        
-namespace TeamSpeak3\Helper;
-
-use TeamSpeak3\TeamSpeak3;
-
-
 /**
  * @class Convert
  * @brief Helper class for data conversion.

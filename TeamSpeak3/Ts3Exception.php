@@ -29,11 +29,12 @@ use TeamSpeak3\Helper\Signal;
 use TeamSpeak3\Helper\StringHelper;
 
 
+
 /**
  * @class Ts3Exception
  * @brief Enhanced exception class for TeamSpeak3 objects.
  */
-class Ts3Exception extends \Exception
+class Ts3Exception extends Exception
 {
   /**
    * Stores the original error code.
