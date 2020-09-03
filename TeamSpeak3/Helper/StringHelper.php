@@ -33,10 +33,10 @@ use TeamSpeak3\Ts3Exception;
 
 
 /**
- * @class 
+ * @class StringHelper
  * @brief Helper class for string handling.
  */
-class  implements ArrayAccess, Iterator, Countable, JsonSerializable
+class StringHelper implements ArrayAccess, Iterator, Countable
 {
   /**
    * Stores the original string.
@@ -51,10 +51,10 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
   protected $position = 0;
 
   /**
-   * The  constructor.
+   * The StringHelper constructor.
    *
    * @param  string $string
-   * @return 
+   * @return StringHelper
    */
   public function __construct($string)
   {
@@ -62,10 +62,10 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
   }
 
   /**
-   * Returns a  object for thegiven string.
+   * Returns a StringHelper object for thegiven string.
    *
    * @param  string $string
-   * @return 
+   * @return StringHelper
    */
   public static function factory($string)
   {
@@ -78,7 +78,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
    * @param  string  $search
    * @param  string  $replace
    * @param  boolean $caseSensitivity
-   * @return 
+   * @return StringHelper
    */
   public function replace($search, $replace, $caseSensitivity = TRUE)
   {
@@ -99,7 +99,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
    *
    * @param  array  $args
    * @param  string $char
-   * @return 
+   * @return StringHelper
    */
   public function arg(array $args, $char = "%")
   {
@@ -163,7 +163,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
   /**
    * Returns the lowercased string.
    *
-   * @return 
+   * @return StringHelper
    */
   public function toLower()
   {
@@ -173,7 +173,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
   /**
    * Returns the uppercased string.
    *
-   * @return 
+   * @return StringHelper
    */
   public function toUpper()
   {
@@ -209,7 +209,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
    *
    * @param  integer $start
    * @param  integer $length
-   * @return 
+   * @return StringHelper
    */
   public function substr($start, $length = null)
   {
@@ -241,7 +241,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
    * Appends $part to the string.
    *
    * @param  string $part
-   * @return 
+   * @return StringHelper
    */
   public function append($part)
   {
@@ -254,7 +254,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
    * Prepends $part to the string.
    *
    * @param  string $part
-   * @return 
+   * @return StringHelper
    */
   public function prepend($part)
   {
@@ -269,7 +269,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
    * @param  string  $separator
    * @param  integer $first
    * @param  integer $last
-   * @return 
+   * @return StringHelper
    */
   public function section($separator, $first = 0, $last = 0)
   {
@@ -300,7 +300,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
    *
    * @param  integer $size
    * @param  string  $char
-   * @return 
+   * @return StringHelper
    */
   public function resize($size, $char = "\0")
   {
@@ -321,7 +321,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
   /**
    * Strips whitespaces (or other characters) from the beginning and end of the string.
    *
-   * @return 
+   * @return StringHelper
    */
   public function trim()
   {
@@ -333,7 +333,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
   /**
    * Escapes a string using the TeamSpeak 3 escape patterns.
    *
-   * @return 
+   * @return StringHelper
    */
   public function escape()
   {
@@ -348,7 +348,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
   /**
    * Unescapes a string using the TeamSpeak 3 escape patterns.
    *
-   * @return 
+   * @return StringHelper
    */
   public function unescape()
   {
@@ -360,7 +360,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
   /**
    * Removes any non alphanumeric characters from the string.
    *
-   * @return 
+   * @return StringHelper
    */
   public function filterAlnum()
   {
@@ -372,7 +372,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
   /**
    * Removes any non alphabetic characters from the string.
    *
-   * @return 
+   * @return StringHelper
    */
   public function filterAlpha()
   {
@@ -384,7 +384,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
   /**
    * Removes any non numeric characters from the string.
    *
-   * @return 
+   * @return StringHelper
    */
   public function filterDigits()
   {
@@ -473,7 +473,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
   /**
    * Converts the string to UTF-8.
    *
-   * @return 
+   * @return StringHelper
    */
   public function toUtf8()
   {
@@ -496,10 +496,10 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
   }
 
   /**
-   * Decodes the string with MIME base64 and returns the result as an 
+   * Decodes the string with MIME base64 and returns the result as an StringHelper
    *
    * @param  string $base64
-   * @return 
+   * @return StringHelper
    */
   public static function fromBase64($base64)
   {
@@ -524,11 +524,11 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
   }
 
   /**
-   * Returns the  based on a given hex value.
+   * Returns the StringHelper based on a given hex value.
    *
    * @param  string $hex
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return StringHelper
    */
   public static function fromHex($hex)
   {
@@ -536,7 +536,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
 
     if(strlen($hex)%2 == 1)
     {
-      throw new ("given parameter '" . $hex . "' is not a valid hexadecimal number");
+      throw new Ts3Exception("given parameter '" . $hex . "' is not a valid hexadecimal number");
     }
 
     foreach(str_split($hex, 2) as $chunk)
@@ -550,7 +550,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
   /**
    * Returns the string transliterated from UTF-8 to Latin.
    *
-   * @return 
+   * @return StringHelper
    */
   public function transliterate()
   {
@@ -773,7 +773,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
    * whitespaces are replaced by a pre-defined spacer and the string is lowercase.
    *
    * @param  string $spacer
-   * @return 
+   * @return StringHelper
    */
   public function uriSafe($spacer = "-")
   {
@@ -806,18 +806,18 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
   }
 
   /**
-   * Magical function that allows you to call PHP's built-in string functions on the  object.
+   * Magical function that allows you to call PHP's built-in string functions on the StringHelper object.
    *
    * @param  string $function
    * @param  array  $args
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return StringHelper
    */
   public function __call($function, $args)
   {
     if(!function_exists($function))
     {
-      throw new ("cannot call undefined function '" . $function . "' on this object");
+      throw new Ts3Exception("cannot call undefined function '" . $function . "' on this object");
     }
 
     if(count($args))
@@ -828,7 +828,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
       }
       else
       {
-        throw new ("cannot call undefined function '" . $function . "' without the " . __CLASS__ . " object parameter");
+        throw new Ts3Exception("cannot call undefined function '" . $function . "' without the " . __CLASS__ . " object parameter");
       }
 
       $return = call_user_func_array($function, $args);
@@ -907,7 +907,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
    */
   public function current()
   {
-    return new ($this->string{$this->position});
+    return new Char($this->string{$this->position});
   }
 
   /**
@@ -931,7 +931,7 @@ class  implements ArrayAccess, Iterator, Countable, JsonSerializable
    */
   public function offsetGet($offset)
   {
-    return ($this->offsetExists($offset)) ? new ($this->string{$offset}) : null;
+    return ($this->offsetExists($offset)) ? new Char($this->string{$offset}) : null;
   }
 
   /**

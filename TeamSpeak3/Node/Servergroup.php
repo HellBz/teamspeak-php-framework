@@ -31,28 +31,28 @@ use TeamSpeak3\Ts3Exception;
 
 
 /**
- * @class 
+ * @class Servergroup
  * @brief Class describing a TeamSpeak 3 server group and all it's parameters.
  */
-class  extends 
+class Servergroup extends AbstractNode
 {
   /**
-   * The  constructor.
+   * The Servergroup constructor.
    *
-   * @param   $server
+   * @param  Server $server
    * @param  array  $info
    * @param  string $index
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Servergroup
    */
-  public function __construct( $server, array $info, $index = "sgid")
+  public function __construct(Server $server, array $info, $index = "sgid")
   {
     $this->parent = $server;
     $this->nodeInfo = $info;
 
     if(!array_key_exists($index, $this->nodeInfo))
     {
-      throw new ("invalid groupID", 0xA00);
+      throw new Ts3Exception("invalid groupID", 0xA00);
     }
 
     $this->nodeId = $this->nodeInfo[$index];
@@ -200,7 +200,7 @@ class  extends
    *
    * @param  string  $description
    * @param  string  $customset
-   * @return 
+   * @return StringHelper
    */
   public function privilegeKeyCreate($description = null, $customset = null)
   {
@@ -221,7 +221,7 @@ class  extends
       {
         $this->execute("sendtextmessage", array("msg" => $msg, "target" => $client, "targetmode" => TeamSpeak3::TEXTMSG_CLIENT));
       }
-      catch( $e)
+      catch(Ts3Exception $e)
       {
         /* ERROR_client_invalid_id */
         if($e->getCode() != 0x0200) throw $e;
@@ -232,7 +232,7 @@ class  extends
   /**
    * Downloads and returns the server groups icon file content.
    *
-   * @return 
+   * @return StringHelper
    */
   public function iconDownload()
   {

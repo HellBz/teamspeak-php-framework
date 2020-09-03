@@ -31,15 +31,15 @@ use TeamSpeak3\Ts3Exception;
 
 
 /**
- * @class 
+ * @class TCP
  * @brief Class for connecting to a remote server through TCP.
  */
-class  extends 
+class TCP extends AbstractTransport
 {
   /**
    * Connects to a remote server.
    *
-   * @throws 
+   * @throws Ts3Exception
    * @return void
    */
   public function connect()
@@ -60,7 +60,7 @@ class  extends
 
       if($this->stream === FALSE)
       {
-        throw new (::factory($errstr)->toUtf8()->toString(), $errno);
+        throw new Ts3Exception(StringHelper::factory($errstr)->toUtf8()->toString(), $errno);
       }
 
       if(!empty($this->config["tls"]))
@@ -74,19 +74,19 @@ class  extends
 
       if($this->session === FALSE)
       {
-        throw new ("failed to establish secure shell connection to server '" . $this->config["host"] . ":" . $this->config["port"] . "'");
+        throw new Ts3Exception("failed to establish secure shell connection to server '" . $this->config["host"] . ":" . $this->config["port"] . "'");
       }
 
       if(!@ssh2_auth_password($this->session, $this->config["username"], $this->config["password"]))
       {
-        throw new ("invalid loginname or password", 0x208);
+        throw new Ts3Exception("invalid loginname or password", 0x208);
       }
 
       $this->stream = @ssh2_shell($this->session, "raw");
 
       if($this->stream === FALSE)
       {
-        throw new ("failed to open a secure shell on server '" . $this->config["host"] . ":" . $this->config["port"] . "'");
+        throw new Ts3Exception("failed to open a secure shell on server '" . $this->config["host"] . ":" . $this->config["port"] . "'");
       }
     }
 
@@ -110,15 +110,15 @@ class  extends
       @ssh2_disconnect($this->session);
     }
 
-    ::getInstance()->emit(strtolower($this->getAdapterType()) . "Disconnected");
+    Signal::getInstance()->emit(strtolower($this->getAdapterType()) . "Disconnected");
   }
 
   /**
    * Reads data from the stream.
    *
    * @param  integer $length
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return StringHelper
    */
   public function read($length = 4096)
   {
@@ -127,28 +127,28 @@ class  extends
 
     $data = @stream_get_contents($this->stream, $length);
 
-    ::getInstance()->emit(strtolower($this->getAdapterType()) . "DataRead", $data);
+    Signal::getInstance()->emit(strtolower($this->getAdapterType()) . "DataRead", $data);
 
     if($data === FALSE)
     {
-      throw new ("connection to server '" . $this->config["host"] . ":" . $this->config["port"] . "' lost");
+      throw new Ts3Exception("connection to server '" . $this->config["host"] . ":" . $this->config["port"] . "' lost");
     }
 
-    return new ($data);
+    return new StringHelper($data);
   }
 
   /**
    * Reads a single line of data from the stream.
    *
    * @param  string $token
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return StringHelper
    */
   public function readLine($token = "\n")
   {
     $this->connect();
 
-    $line = ::factory("");
+    $line = StringHelper::factory("");
 
     while(!$line->endsWith($token))
     {
@@ -156,7 +156,7 @@ class  extends
 
       $data = @fgets($this->stream, 4096);
 
-      ::getInstance()->emit(strtolower($this->getAdapterType()) . "DataRead", $data);
+      Signal::getInstance()->emit(strtolower($this->getAdapterType()) . "DataRead", $data);
 
       if($data === FALSE)
       {
@@ -166,7 +166,7 @@ class  extends
         }
         else
         {
-          throw new ("connection to server '" . $this->config["host"] . ":" . $this->config["port"] . "' lost");
+          throw new Ts3Exception("connection to server '" . $this->config["host"] . ":" . $this->config["port"] . "' lost");
         }
       }
       else
@@ -190,7 +190,7 @@ class  extends
 
     @fwrite($this->stream, $data);
 
-    ::getInstance()->emit(strtolower($this->getAdapterType()) . "DataSend", $data);
+    Signal::getInstance()->emit(strtolower($this->getAdapterType()) . "DataSend", $data);
   }
 
   /**

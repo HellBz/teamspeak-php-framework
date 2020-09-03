@@ -33,16 +33,16 @@ use TeamSpeak3\Helper\StringHelper;
 
 
 /**
- * @class 
+ * @class FileTransfer
  * @brief Provides low-level methods for file transfer communication with a TeamSpeak 3 Server.
  */
-class  extends 
+class FileTransfer extends AbstractAdapter
 {
   /**
-   * Connects the  object and performs initial actions on the remote
+   * Connects the AbstractTransport object and performs initial actions on the remote
    * server.
    *
-   * @throws 
+   * @throws Ts3Exception
    * @return void
    */
   public function syn()
@@ -50,19 +50,19 @@ class  extends
     $this->initTransport($this->options);
     $this->transport->setAdapter($this);
 
-    ::init(spl_object_hash($this));
+    Profiler::init(spl_object_hash($this));
 
-    ::getInstance()->emit("filetransferConnected", $this);
+    Signal::getInstance()->emit("filetransferConnected", $this);
   }
 
   /**
-   * The  destructor.
+   * The FileTransfer destructor.
    *
    * @return void
    */
   public function __destruct()
   {
-    if($this->getTransport() instanceof  && $this->getTransport()->isConnected())
+    if($this->getTransport() instanceof AbstractTransport && $this->getTransport()->isConnected())
     {
       $this->getTransport()->disconnect();
     }
@@ -72,20 +72,20 @@ class  extends
    * Sends a valid file transfer key to the server to initialize the file transfer.
    *
    * @param  string $ftkey
-   * @throws _Exception
+   * @throws FileTransfer_Exception
    * @return void
    */
   protected function init($ftkey)
   {
     if(strlen($ftkey) != 32 && strlen($ftkey) != 16)
     {
-      throw new _Exception("invalid file transfer key format");
+      throw new FileTransfer_Exception("invalid file transfer key format");
     }
 
     $this->getProfiler()->start();
     $this->getTransport()->send($ftkey);
 
-    ::getInstance()->emit("filetransferHandshake", $this);
+    Signal::getInstance()->emit("filetransferHandshake", $this);
   }
 
   /**
@@ -94,7 +94,7 @@ class  extends
    * @param  string  $ftkey
    * @param  integer $seek
    * @param  string  $data
-   * @throws _Exception
+   * @throws FileTransfer_Exception
    * @return void
    */
   public function upload($ftkey, $seek, $data)
@@ -105,7 +105,7 @@ class  extends
     $seek = intval($seek);
     $pack = 4096;
 
-    ::getInstance()->emit("filetransferUploadStarted", $ftkey, $seek, $size);
+    Signal::getInstance()->emit("filetransferUploadStarted", $ftkey, $seek, $size);
 
     for(;$seek < $size;)
     {
@@ -116,27 +116,27 @@ class  extends
 
       $this->getTransport()->send($buff);
 
-      ::getInstance()->emit("filetransferUploadProgress", $ftkey, $seek, $size);
+      Signal::getInstance()->emit("filetransferUploadProgress", $ftkey, $seek, $size);
     }
 
     $this->getProfiler()->stop();
 
-    ::getInstance()->emit("filetransferUploadFinished", $ftkey, $seek, $size);
+    Signal::getInstance()->emit("filetransferUploadFinished", $ftkey, $seek, $size);
 
     if($seek < $size)
     {
-      throw new _Exception("incomplete file upload (" . $seek . " of " . $size . " bytes)");
+      throw new FileTransfer_Exception("incomplete file upload (" . $seek . " of " . $size . " bytes)");
     }
   }
 
   /**
-   * Returns the content of a downloaded file as a  object.
+   * Returns the content of a downloaded file as a StringHelper object.
    *
    * @param  string  $ftkey
    * @param  integer $size
    * @param  boolean $passthru
-   * @throws _Exception
-   * @return 
+   * @throws FileTransfer_Exception
+   * @return StringHelper
    */
   public function download($ftkey, $size, $passthru = FALSE)
   {
@@ -147,11 +147,11 @@ class  extends
       return $this->passthru($size);
     }
 
-    $buff = new ("");
+    $buff = new StringHelper("");
     $size = intval($size);
     $pack = 4096;
 
-    ::getInstance()->emit("filetransferDownloadStarted", $ftkey, count($buff), $size);
+    Signal::getInstance()->emit("filetransferDownloadStarted", $ftkey, count($buff), $size);
 
     for($seek = 0;$seek < $size;)
     {
@@ -162,16 +162,16 @@ class  extends
 
       $buff->append($data);
 
-      ::getInstance()->emit("filetransferDownloadProgress", $ftkey, count($buff), $size);
+      Signal::getInstance()->emit("filetransferDownloadProgress", $ftkey, count($buff), $size);
     }
 
     $this->getProfiler()->stop();
 
-    ::getInstance()->emit("filetransferDownloadFinished", $ftkey, count($buff), $size);
+    Signal::getInstance()->emit("filetransferDownloadFinished", $ftkey, count($buff), $size);
 
     if(strlen($buff) != $size)
     {
-      throw new _Exception("incomplete file download (" . count($buff) . " of " . $size . " bytes)");
+      throw new FileTransfer_Exception("incomplete file download (" . count($buff) . " of " . $size . " bytes)");
     }
 
     return $buff;
@@ -182,7 +182,7 @@ class  extends
    * function.
    *
    * @param  integer $size
-   * @throws _Exception
+   * @throws FileTransfer_Exception
    * @return void
    */
   protected function passthru($size)
@@ -191,7 +191,7 @@ class  extends
 
     if($buff_size != $size)
     {
-      throw new _Exception("incomplete file download (" . intval($buff_size) . " of " . $size . " bytes)");
+      throw new FileTransfer_Exception("incomplete file download (" . intval($buff_size) . " of " . $size . " bytes)");
     }
   }
 }

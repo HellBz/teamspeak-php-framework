@@ -22,11 +22,17 @@
  * @copyright Copyright (c) Planet TeamSpeak. All rights reserved.
  */
 
+        
+namespace TeamSpeak3\Helper;
+
+use TeamSpeak3\TeamSpeak3;
+
+
 /**
- * @class 
+ * @class Convert
  * @brief Helper class for data conversion.
  */
-class 
+class Convert
 {
   /**
    * Converts bytes to a human readable value.
@@ -261,7 +267,7 @@ class
       $array["level"]     = TeamSpeak3::LOGLEVEL_ERROR;
       $array["channel"]   = "ParamParser";
       $array["server_id"] = "";
-      $array["msg"]       = ::factory("convert error (" . trim($entry) . ")");
+      $array["msg"]       = StringHelper::factory("convert error (" . trim($entry) . ")");
       $array["msg_plain"] = $entry;
       $array["malformed"] = TRUE;
     }
@@ -271,7 +277,7 @@ class
       $array["level"]     = self::logLevel(trim($parts[1]));
       $array["channel"]   = trim($parts[2]);
       $array["server_id"] = trim($parts[3]);
-      $array["msg"]       = ::factory(trim($parts[4]));
+      $array["msg"]       = StringHelper::factory(trim($parts[4]));
       $array["msg_plain"] = $entry;
       $array["malformed"] = FALSE;
     }
@@ -317,9 +323,9 @@ class
    */
   public static function version($version, $format = "Y-m-d h:i:s")
   {
-    if(!$version instanceof )
+    if(!$version instanceof StringHelper)
     {
-      $version = new ($version);
+      $version = new StringHelper($version);
     }
 
     $buildno = $version->section("[", 1)->filterDigits()->toInt();
@@ -335,9 +341,9 @@ class
    */
   public static function versionShort($version)
   {
-    if(!$version instanceof )
+    if(!$version instanceof StringHelper)
     {
-      $version = new ($version);
+      $version = new StringHelper($version);
     }
     
     return $version->section(" ", 0);

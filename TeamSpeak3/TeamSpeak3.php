@@ -298,7 +298,7 @@ class TeamSpeak3
   );
 
   /**
-   * Factory for  classes. $uri must be formatted as
+   * Factory for AbstractAdapter classes. $uri must be formatted as
    * "<adapter>://<user>:<pass>@<host>:<port>/<options>#<flags>". All parameters
    * except adapter, host and port are optional.
    *
@@ -331,21 +331,21 @@ class TeamSpeak3
    *   - filetransfer://127.0.0.1:30011/
    *
    * @param  string $uri
-   * @return 
-   * @return 
-   * @return 
-   * @return 
+   * @return AbstractAdapter
+   * @return AbstractNode
+   * @return Host
+   * @return Server
    */
   public static function factory($uri)
   {
     self::init();
 
-    $uri = new ($uri);
+    $uri = new Uri($uri);
 
     $adapter = self::getAdapterName($uri->getScheme());
     $options = array("host" => $uri->getHost(), "port" => $uri->getPort(), "timeout" => (int) $uri->getQueryVar("timeout", 10), "blocking" => (int) $uri->getQueryVar("blocking", 1), "tls" => (int) $uri->getQueryVar("tls", 0), "ssh" => (int) $uri->getQueryVar("ssh", 0));
 
-    self::loadClass($adapter);
+    //self::loadClass($adapter);
 
     if($options["ssh"])
     {
@@ -355,7 +355,7 @@ class TeamSpeak3
 
     $object = new $adapter($options);
 
-    if($object instanceof )
+    if($object instanceof ServerQuery)
     {
       $node = $object->getHost();
 
@@ -413,7 +413,7 @@ class TeamSpeak3
         $node = $node->serverGetByName($uri->getQueryVar("server_name"));
       }
 
-      if($node instanceof )
+      if($node instanceof Server)
       {
         if($uri->hasQueryVar("channel_id"))
         {
@@ -454,6 +454,7 @@ class TeamSpeak3
    * @throws LogicException
    * @return boolean
    */
+/* 
   protected static function loadClass($class)
   {
     if(class_exists($class, FALSE) || interface_exists($class, FALSE))
@@ -479,7 +480,8 @@ class TeamSpeak3
     }
 
     return include_once($file);
-  }
+  } 
+*/
 
   /**
    * Generates a possible file path for $name.
@@ -492,7 +494,7 @@ class TeamSpeak3
     $path = str_replace("_", DIRECTORY_SEPARATOR, $name);
     $path = str_replace(__CLASS__, dirname(__FILE__), $path);
 
-    return $path;
+    return __DIR__."/".$name;
   }
 
   /**
@@ -500,7 +502,7 @@ class TeamSpeak3
    *
    * @param  string $name
    * @param  string $namespace
-   * @throws 
+   * @throws Ts3Exception
    * @return string
    */
   protected static function getAdapterName($name, $namespace = "Adapter/")
@@ -510,15 +512,15 @@ class TeamSpeak3
 
     foreach($scan as $node)
     {
-      $file = ::factory($node)->toLower();
+      $file = StringHelper::factory($node)->toLower();
 
       if($file->startsWith($name) && $file->endsWith(".php"))
       {
-        return str_replace(".php", "", "TeamSpeak3\\Adapter\" . $node);
+        return str_replace(".php", "", "TeamSpeak3\\Adapter\\" . $node);
       }
     }
 
-    throw new ("adapter '" . $name . "' does not exist");
+    throw new Ts3Exception("adapter '" . $name . "' does not exist");
   }
 
   /**
@@ -527,7 +529,8 @@ class TeamSpeak3
    * @param  string $class
    * @return boolean
    */
-  public static function autoload($class)
+/*
+   public static function autoload($class)
   {
     if(substr($class, 0, strlen(__CLASS__)) != __CLASS__) return;
 
@@ -541,7 +544,8 @@ class TeamSpeak3
     {
       return FALSE;
     }
-  }
+  } 
+  */
 
   /**
    * Checks for required PHP features, enables autoloading and starts a default profiler.
@@ -566,12 +570,12 @@ class TeamSpeak3
       throw new LogicException("autoload functions are not available in this PHP installation");
     }
 
-    if(!class_exists(""))
+/*     if(!class_exists("Profiler"))
     {
       spl_autoload_register(array(__CLASS__, "autoload"));
-    }
+    } */
 
-    ::start();
+    Profiler::start();
   }
 
   /**
@@ -826,7 +830,7 @@ class TeamSpeak3
  *   $ts3_VirtualServer = TeamSpeak3::factory("serverquery://username:password@127.0.0.1:10011/?server_port=9987");
  *
  *   // build and display HTML treeview using custom image paths (remote icons will be embedded using data URI sheme)
- *   echo $ts3_VirtualServer->getViewer(new ("images/viewericons/", "images/countryflags/", "data:image"));
+ *   echo $ts3_VirtualServer->getViewer(new Html("images/viewericons/", "images/countryflags/", "data:image"));
  * @endcode
  *
  * \subsection example10 10. Update all outdated Audio Codecs to their Opus equivalent
@@ -866,7 +870,7 @@ class TeamSpeak3
  *   $avatar = $ts3_Client->avatarDownload();
  *
  *   // send header and display image
- *   header("Content-Type: " . ::imageMimeType($avatar));
+ *   header("Content-Type: " . Convert::imageMimeType($avatar));
  *   echo $avatar;
  * @endcode
  *
@@ -882,13 +886,13 @@ class TeamSpeak3
  *   $ts3_VirtualServer->notifyRegister("textprivate");
  *
  *   // register a callback for notifyTextmessage events 
- *   ::getInstance()->subscribe("notifyTextmessage", "onTextmessage");
+ *   Signal::getInstance()->subscribe("notifyTextmessage", "onTextmessage");
  *   
  *   // wait for events
  *   while(1) $ts3_VirtualServer->getAdapter()->wait();
  *  
  *   // define a callback function
- *   function onTextmessage( $event,  $host)
+ *   function onTextmessage(Event $event, Host $host)
  *   {
  *     echo "Client " . $event["invokername"] . " sent textmessage: " . $event["msg"];
  *   }
@@ -900,7 +904,7 @@ class TeamSpeak3
  *   require_once("libraries/TeamSpeak3/TeamSpeak3.php");
  *
  *   // register custom error message (supported placeholders are: %file, %line, %code and %mesg)
- *   ::registerCustomMessage(0x300, "The specified channel does not exist; server said: %mesg");
+ *   Ts3Exception::registerCustomMessage(0x300, "The specified channel does not exist; server said: %mesg");
  *
  *   try
  *   {
@@ -910,7 +914,7 @@ class TeamSpeak3
  *     // spawn an object for the channel using a specified name
  *     $ts3_Channel = $ts3_VirtualServer->channelGetByName("I do not exist");
  *   }
- *   catch( $e)
+ *   catch(Ts3Exception $e)
  *   {
  *     // print the error message returned by the server
  *     echo "Error " . $e->getCode() . ": " . $e->getMessage();

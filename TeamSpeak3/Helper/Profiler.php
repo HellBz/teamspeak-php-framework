@@ -29,10 +29,10 @@ use TeamSpeak3\Helper\Profiler\Timer;
 
 
 /**
- * @class 
+ * @class Profiler
  * @brief Helper class for profiler handling.
  */
-class 
+class Profiler
 {
   /**
    * Stores various timers for code profiling.
@@ -49,7 +49,7 @@ class
    */
   public static function init($name = "default")
   {
-    self::$timers[$name] = new _Timer($name);
+    self::$timers[$name] = new Timer($name);
   }
 
   /**
@@ -66,7 +66,7 @@ class
     }
     else
     {
-      self::$timers[$name] = new _Timer($name);
+      self::$timers[$name] = new Timer($name);
     }
   }
 
@@ -90,7 +90,7 @@ class
    * Returns a timer.
    *
    * @param  string $name
-   * @return _Timer
+   * @return Timer
    */
   public static function get($name = "default")
   {

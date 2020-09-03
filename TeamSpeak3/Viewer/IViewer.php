@@ -29,17 +29,17 @@ use TeamSpeak3\Node\AbstractNode;
 
 
 /**
- * @class 
+ * @class IViewer
  * @brief Interface class describing a TeamSpeak 3 viewer.
  */
-interface 
+interface IViewer
 {
   /**
    * Returns the code needed to display a node in a TeamSpeak 3 viewer.
    *
-   * @param   $node
+   * @param  AbstractNode $node
    * @param  array $siblings
    * @return string
    */
-  public function fetchObject( $node, array $siblings = array());
+  public function fetchObject(AbstractNode $node, array $siblings = array());
 }

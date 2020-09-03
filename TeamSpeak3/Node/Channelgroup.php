@@ -29,28 +29,28 @@ use TeamSpeak3\TeamSpeak3;
 
 
 /**
- * @class group
+ * @class Channelgroup
  * @brief Class describing a TeamSpeak 3 channel group and all it's parameters.
  */
-class group extends 
+class Channelgroup extends AbstractNode
 {
   /**
-   * The group constructor.
+   * The Channelgroup constructor.
    *
-   * @param   $server
+   * @param  Server $server
    * @param  array  $info
    * @param  string $index
-   * @throws 
-   * @return group
+   * @throws Ts3Exception
+   * @return Channelgroup
    */
-  public function __construct( $server, array $info, $index = "cgid")
+  public function __construct(Server $server, array $info, $index = "cgid")
   {
     $this->parent = $server;
     $this->nodeInfo = $info;
 
     if(!array_key_exists($index, $this->nodeInfo))
     {
-      throw new ("invalid groupID", 0xA00);
+      throw new Ts3Exception("invalid groupID", 0xA00);
     }
 
     $this->nodeId = $this->nodeInfo[$index];
@@ -177,7 +177,7 @@ class group extends
    * @param  integer $cid
    * @param  string  $description
    * @param  string  $customset
-   * @return 
+   * @return StringHelper
    */
   public function privilegeKeyCreate($cid, $description = null, $customset = null)
   {
@@ -198,7 +198,7 @@ class group extends
       {
         $this->execute("sendtextmessage", array("msg" => $msg, "target" => $client, "targetmode" => TeamSpeak3::TEXTMSG_CLIENT));
       }
-      catch( $e)
+      catch(Ts3Exception $e)
       {
         /* ERROR_client_invalid_id */
         if($e->getCode() != 0x0200) throw $e;
@@ -209,7 +209,7 @@ class group extends
   /**
    * Downloads and returns the channel groups icon file content.
    *
-   * @return 
+   * @return StringHelper
    */
   public function iconDownload()
   {

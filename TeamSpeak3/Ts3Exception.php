@@ -34,7 +34,7 @@ use TeamSpeak3\Helper\Profiler\Timer;
 
 
 /**
- * @class 
+ * @class Ts3Exception
  * @brief Enhanced exception class for TeamSpeak3 objects.
  */
 class Ts3Exception extends \Exception
@@ -61,11 +61,11 @@ class Ts3Exception extends \Exception
   protected static $messages = array();
 
   /**
-   * The  constructor.
+   * The Ts3Exception constructor.
    *
    * @param  string  $mesg
    * @param  integer $code
-   * @return 
+   * @return Ts3Exception
    */
   public function __construct($mesg, $code = 0x00)
   {
@@ -79,16 +79,16 @@ class Ts3Exception extends \Exception
       $this->message = $this->prepareCustomMessage(self::$messages[intval($code)]);
     }
 
-    ::getInstance()->emit("errorException", $this);
+    Signal::getInstance()->emit("errorException", $this);
   }
 
   /**
    * Prepares a custom error message by replacing pre-defined signs with given values.
    *
-   * @param   $mesg
-   * @return 
+   * @param  StringHelper $mesg
+   * @return StringHelper
    */
-  protected function prepareCustomMessage( $mesg)
+  protected function prepareCustomMessage(StringHelper $mesg)
   {
     $args = array(
       "code" => $this->getCode(),
@@ -105,7 +105,7 @@ class Ts3Exception extends \Exception
    *
    * @param  integer $code
    * @param  string  $mesg
-   * @throws 
+   * @throws Ts3Exception
    * @return void
    */
   public static function registerCustomMessage($code, $mesg)
@@ -120,14 +120,14 @@ class Ts3Exception extends \Exception
       throw new self("custom message for code 0x" . strtoupper(dechex($code)) . " must be a string");
     }
 
-    self::$messages[(int) $code] = new ($mesg);
+    self::$messages[(int) $code] = new StringHelper($mesg);
   }
 
   /**
    * Unregisters a custom error message from $code.
    *
    * @param  integer $code
-   * @throws 
+   * @throws Ts3Exception
    * @return void
    */
   public static function unregisterCustomMessage($code)

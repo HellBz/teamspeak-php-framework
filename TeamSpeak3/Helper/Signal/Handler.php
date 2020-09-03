@@ -29,10 +29,10 @@ use TeamSpeak3\Ts3Exception;
 
 
 /**
- * @class _Handler
+ * @class Handler
  * @brief Helper class providing handler functions for signals.
  */
-class _Handler
+class Handler
 {
   /**
    * Stores the name of the subscribed signal.
@@ -49,12 +49,12 @@ class _Handler
   protected $callback = null;
 
   /**
-   * The _Handler constructor.
+   * The Handler constructor.
    *
    * @param  string $signal
    * @param  mixed  $callback
-   * @throws _Exception
-   * @return _Handler
+   * @throws Ts3Exception
+   * @return Handler
    */
   public function __construct($signal, $callback)
   {
@@ -62,7 +62,7 @@ class _Handler
 
     if(!is_callable($callback))
     {
-      throw new _Exception("invalid callback specified for signal '" . $signal . "'");
+      throw new Ts3Exception("invalid callback specified for signal '" . $signal . "'");
     }
 
     $this->callback = $callback;

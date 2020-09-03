@@ -29,10 +29,10 @@ use TeamSpeak3\Ts3Exception;
 /**
  * @todo: Replace this class with native encryption
  *
- * @class 
+ * @class Crypt
  * @brief Helper class for data encryption.
  */
-class 
+class Crypt
 {
   /**
    * Stores the secret passphrase to encrypt or decrypt a given string.
@@ -56,10 +56,10 @@ class
   protected $s = array();
 
   /**
-   * The  constructor.
+   * The Crypt constructor.
    *
    * @param  string $secret
-   * @return 
+   * @return Crypt
    */
   public function __construct($secret)
   {
@@ -165,7 +165,7 @@ class
 
     if(strlen($passphrase) < 1 || strlen($passphrase) > 56)
     {
-      throw new ("secret passphrase must contain at least one but less than 56 characters");
+      throw new Ts3Exception("secret passphrase must contain at least one but less than 56 characters");
     }
 
     $k = 0;

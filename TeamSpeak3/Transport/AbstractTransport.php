@@ -32,10 +32,10 @@ use TeamSpeak3\Adapter\AbstractAdapter;
 
 
 /**
- * @class 
+ * @class AbstractTransport
  * @brief Abstract class for connecting to a TeamSpeak 3 Server through different ways of transport.
  */
-abstract class 
+abstract class AbstractTransport
 {
   /**
    * Stores user-provided configuration settings.
@@ -59,29 +59,29 @@ abstract class
   protected $session = null;
 
   /**
-   * Stores the  object using this transport.
+   * Stores the AbstractAdapter object using this transport.
    *
-   * @var 
+   * @var AbstractAdapter
    */
   protected $adapter = null;
 
   /**
-   * The  constructor.
+   * The AbstractTransport constructor.
    *
    * @param  array $config
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return AbstractTransport
    */
   public function __construct(array $config)
   {
     if(!array_key_exists("host", $config))
     {
-      throw new ("config must have a key for 'host' which specifies the server host name");
+      throw new Ts3Exception("config must have a key for 'host' which specifies the server host name");
     }
 
     if(!array_key_exists("port", $config))
     {
-      throw new ("config must have a key for 'port' which specifies the server port number");
+      throw new Ts3Exception("config must have a key for 'port' which specifies the server port number");
     }
 
     if(!array_key_exists("timeout", $config))
@@ -118,13 +118,13 @@ abstract class
   }
 
   /**
-   * The  destructor.
+   * The AbstractTransport destructor.
    *
    * @return void
    */
   public function __destruct()
   {
-    if($this->adapter instanceof )
+    if($this->adapter instanceof AbstractAdapter)
     {
       $this->adapter->__destruct();
     }
@@ -135,7 +135,7 @@ abstract class
   /**
    * Connects to a remote server.
    *
-   * @throws 
+   * @throws Ts3Exception
    * @return void
    */
   abstract public function connect();
@@ -151,8 +151,8 @@ abstract class
    * Reads data from the stream.
    *
    * @param  integer $length
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return StringHelper
    */
   abstract public function read($length = 4096);
 
@@ -192,20 +192,20 @@ abstract class
   }
 
   /**
-   * Sets the  object using this transport.
+   * Sets the AbstractAdapter object using this transport.
    *
-   * @param   $adapter
+   * @param  AbstractAdapter $adapter
    * @return void
    */
-  public function setAdapter( $adapter)
+  public function setAdapter(AbstractAdapter $adapter)
   {
     $this->adapter = $adapter;
   }
 
   /**
-   * Returns the  object using this transport.
+   * Returns the AbstractAdapter object using this transport.
    *
-   * @return 
+   * @return AbstractAdapter
    */
   public function getAdapter()
   {
@@ -219,9 +219,9 @@ abstract class
    */
   public function getAdapterType()
   {
-    if($this->adapter instanceof )
+    if($this->adapter instanceof AbstractAdapter)
     {
-      $string = ::factory(get_class($this->adapter));
+      $string = StringHelper::factory(get_class($this->adapter));
 
       return $string->substr($string->findLast("_"))->replace(array("_", " "), "")->toString();
     }
@@ -232,14 +232,14 @@ abstract class
   /**
    * Returns header/meta data from stream pointer.
    *
-   * @throws 
+   * @throws Ts3Exception
    * @return array
    */
   public function getMetaData()
   {
     if($this->stream === null)
     {
-      throw new ("unable to retrieve header/meta data from stream pointer");
+      throw new Ts3Exception("unable to retrieve header/meta data from stream pointer");
     }
 
     return stream_get_meta_data($this->stream);
@@ -273,7 +273,7 @@ abstract class
 
       if($time)
       {
-        ::getInstance()->emit(strtolower($this->getAdapterType()) . "WaitTimeout", $time, $this->getAdapter());
+        Signal::getInstance()->emit(strtolower($this->getAdapterType()) . "WaitTimeout", $time, $this->getAdapter());
       }
 
       $time = $time+$this->config["timeout"];

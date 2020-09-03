@@ -34,19 +34,19 @@ use TeamSpeak3\Helper\Profiler;
 use TeamSpeak3\Helper\Signal;
 use TeamSpeak3\Transport\AbstractTransport;
 use TeamSpeak3\Helper\StringHelper;
-use TeamSpeak3\Node\AbstractNode;
+use TeamSpeak3\Adapter\AbstractAdapter;
 
 
 /**
- * @class 
+ * @class ServerQuery
  * @brief Provides low-level methods for ServerQuery communication with a TeamSpeak 3 Server.
  */
-class  extends 
+class ServerQuery extends AbstractAdapter
 {
   /**
-   * Stores a singleton instance of the active  object.
+   * Stores a singleton instance of the active Host object.
    *
-   * @var 
+   * @var Host
    */
   protected $host = null;
 
@@ -72,10 +72,10 @@ class  extends
   protected $block = array("help");
 
   /**
-   * Connects the  object and performs initial actions on the remote
+   * Connects the AbstractTransport object and performs initial actions on the remote
    * server.
    *
-   * @throws 
+   * @throws Ts3Exception
    * @return void
    */
   protected function syn()
@@ -83,26 +83,26 @@ class  extends
     $this->initTransport($this->options);
     $this->transport->setAdapter($this);
 
-    ::init(spl_object_hash($this));
+    Profiler::init(spl_object_hash($this));
 
     $rdy = $this->getTransport()->readLine();
 
     if(!$rdy->startsWith(TeamSpeak3::TS3_PROTO_IDENT) && !$rdy->startsWith(TeamSpeak3::TEA_PROTO_IDENT) && !(defined("CUSTOM_PROTO_IDENT") && $rdy->startsWith(CUSTOM_PROTO_IDENT)))
     {
-      throw new ("invalid reply from the server (" . $rdy . ")");
+      throw new Ts3Exception("invalid reply from the server (" . $rdy . ")");
     }
 
-    ::getInstance()->emit("serverqueryConnected", $this);
+    Signal::getInstance()->emit("serverqueryConnected", $this);
   }
 
   /**
-   * The  destructor.
+   * The ServerQuery destructor.
    *
    * @return void
    */
   public function __destruct()
   {
-    if($this->getTransport() instanceof  && $this->transport->isConnected())
+    if($this->getTransport() instanceof AbstractTransport && $this->transport->isConnected())
     {
       try
       {
@@ -120,23 +120,23 @@ class  extends
    *
    * @param  string  $cmd
    * @param  boolean $throw
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Reply
    */
   public function request($cmd, $throw = TRUE)
   {
-    $query = ::factory($cmd)->section(TeamSpeak3::SEPARATOR_CELL);
+    $query = StringHelper::factory($cmd)->section(TeamSpeak3::SEPARATOR_CELL);
 
     if(strstr($cmd, "\r") || strstr($cmd, "\n"))
     {
-      throw new ("illegal characters in command '" . $query . "'");
+      throw new Ts3Exception("illegal characters in command '" . $query . "'");
     }
     elseif(in_array($query, $this->block))
     {
-      throw new ("command not found", 0x100);
+      throw new Ts3Exception("command not found", 0x100);
     }
 
-    ::getInstance()->emit("serverqueryCommandStarted", $cmd);
+    Signal::getInstance()->emit("serverqueryCommandStarted", $cmd);
 
     $this->getProfiler()->start();
     $this->getTransport()->sendLine($cmd);
@@ -148,13 +148,13 @@ class  extends
     do {
       $str = $this->getTransport()->readLine();
       $rpl[] = $str;
-    } while($str instanceof  && $str->section(TeamSpeak3::SEPARATOR_CELL) != TeamSpeak3::ERROR);
+    } while($str instanceof StringHelper && $str->section(TeamSpeak3::SEPARATOR_CELL) != TeamSpeak3::ERROR);
 
     $this->getProfiler()->stop();
 
-    $reply = new ($rpl, $cmd, $this->getHost(), $throw);
+    $reply = new Reply($rpl, $cmd, $this->getHost(), $throw);
 
-    ::getInstance()->emit("serverqueryCommandFinished", $cmd, $reply);
+    Signal::getInstance()->emit("serverqueryCommandFinished", $cmd, $reply);
 
     return $reply;
   }
@@ -162,21 +162,21 @@ class  extends
   /**
    * Waits for the server to send a notification message and returns the result.
    *
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Event
    */
   public function wait()
   {
     if($this->getTransport()->getConfig("blocking"))
     {
-      throw new ("only available in non-blocking mode");
+      throw new Ts3Exception("only available in non-blocking mode");
     }
 
     do {
       $evt = $this->getTransport()->readLine();
-    } while($evt instanceof  && !$evt->section(TeamSpeak3::SEPARATOR_CELL)->startsWith(TeamSpeak3::EVENT));
+    } while($evt instanceof StringHelper && !$evt->section(TeamSpeak3::SEPARATOR_CELL)->startsWith(TeamSpeak3::EVENT));
 
-    return new ($evt, $this->getHost());
+    return new Event($evt, $this->getHost());
   }
 
   /**
@@ -204,9 +204,9 @@ class  extends
           if($value[$i] === null) continue;
           elseif($value[$i] === FALSE) $value[$i] = 0x00;
           elseif($value[$i] === TRUE) $value[$i] = 0x01;
-          elseif($value[$i] instanceof ) $value[$i] = $value[$i]->getId();
+          elseif($value[$i] instanceof AbstractNode) $value[$i] = $value[$i]->getId();
 
-          $cells[$i][] = $ident . ::factory($value[$i])->escape()->toUtf8();
+          $cells[$i][] = $ident . StringHelper::factory($value[$i])->escape()->toUtf8();
         }
       }
       else
@@ -214,9 +214,9 @@ class  extends
         if($value === null) continue;
         elseif($value === FALSE) $value = 0x00;
         elseif($value === TRUE) $value = 0x01;
-        elseif($value instanceof ) $value = $value->getId();
+        elseif($value instanceof AbstractNode) $value = $value->getId();
 
-        $args[] = $ident . ::factory($value)->escape()->toUtf8();
+        $args[] = $ident . StringHelper::factory($value)->escape()->toUtf8();
       }
     }
 
@@ -259,15 +259,15 @@ class  extends
   }
 
   /**
-   * Returns the  object of the current connection.
+   * Returns the Host object of the current connection.
    *
-   * @return 
+   * @return Host
    */
   public function getHost()
   {
     if($this->host === null)
     {
-      $this->host = new ($this);
+      $this->host = new Host($this);
     }
 
     return $this->host;

@@ -36,10 +36,10 @@ use TeamSpeak3\Ts3Exception;
 
 
 /**
- * @class 
+ * @class Host
  * @brief Class describing a TeamSpeak 3 server instance and all it's parameters.
  */
-class  extends 
+class Host extends AbstractNode
 {
   /**
    * @ignore
@@ -92,12 +92,12 @@ class  extends
   protected $sort_clients_channels = FALSE;
 
   /**
-   * The  constructor.
+   * The Host constructor.
    *
-   * @param   $squery
-   * @return 
+   * @param  ServerQuery $squery
+   * @return Host
    */
-  public function __construct( $squery)
+  public function __construct(ServerQuery $squery)
   {
     $this->parent = $squery;
   }
@@ -171,7 +171,7 @@ class  extends
 
     $this->setStorage("_server_use", array(__FUNCTION__, $getargs));
 
-    ::getInstance()->emit("notifyServerselected", $this);
+    Signal::getInstance()->emit("notifyServerselected", $this);
   }
 
   /**
@@ -219,7 +219,7 @@ class  extends
 
     $this->setStorage("_server_use", array(__FUNCTION__, $getargs));
 
-    ::getInstance()->emit("notifyServerselected", $this);
+    Signal::getInstance()->emit("notifyServerselected", $this);
   }
 
   /**
@@ -257,16 +257,16 @@ class  extends
   {
     if(!array_key_exists((string) $sid, $this->serverList()))
     {
-      throw new ("invalid serverID", 0x400);
+      throw new Ts3Exception("invalid serverID", 0x400);
     }
 
     return $this->serverList[intval((string) $sid)]["virtualserver_port"];
   }
 
   /**
-   * Returns the  object matching the currently selected ID.
+   * Returns the Server object matching the currently selected ID.
    *
-   * @return 
+   * @return Server
    */
   public function serverGetSelected()
   {
@@ -274,37 +274,37 @@ class  extends
   }
 
   /**
-   * Returns the  object matching the given ID.
+   * Returns the Server object matching the given ID.
    *
    * @param  integer $sid
-   * @return 
+   * @return Server
    */
   public function serverGetById($sid)
   {
     $this->serverSelectById($sid);
 
-    return new ($this, array("virtualserver_id" => intval($sid)));
+    return new Server($this, array("virtualserver_id" => intval($sid)));
   }
 
   /**
-   * Returns the  object matching the given port number.
+   * Returns the Server object matching the given port number.
    *
    * @param  integer $port
-   * @return 
+   * @return Server
    */
   public function serverGetByPort($port)
   {
     $this->serverSelectByPort($port);
 
-    return new ($this, array("virtualserver_id" => $this->serverSelectedId()));
+    return new Server($this, array("virtualserver_id" => $this->serverSelectedId()));
   }
 
   /**
-   * Returns the first  object matching the given name.
+   * Returns the first Server object matching the given name.
    *
    * @param  string $name
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Server
    */
   public function serverGetByName($name)
   {
@@ -313,15 +313,15 @@ class  extends
       if($server["virtualserver_name"] == $name) return $server;
     }
 
-    throw new ("invalid serverID", 0x400);
+    throw new Ts3Exception("invalid serverID", 0x400);
   }
 
   /**
-   * Returns the first  object matching the given unique identifier.
+   * Returns the first Server object matching the given unique identifier.
    *
    * @param  string $uid
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Server
    */
   public function serverGetByUid($uid)
   {
@@ -330,7 +330,7 @@ class  extends
       if($server["virtualserver_unique_identifier"] == $uid) return $server;
     }
 
-    throw new ("invalid serverID", 0x400);
+    throw new Ts3Exception("invalid serverID", 0x400);
   }
 
   /**
@@ -345,10 +345,10 @@ class  extends
     $this->serverListReset();
 
     $detail = $this->execute("servercreate", $properties)->toList();
-    $server = new ($this, array("virtualserver_id" => intval($detail["sid"])));
+    $server = new Server($this, array("virtualserver_id" => intval($detail["sid"])));
 
-    ::getInstance()->emit("notifyServercreated", $this, $detail["sid"]);
-    ::getInstance()->emit("notifyTokencreated", $server, $detail["token"]);
+    Signal::getInstance()->emit("notifyServercreated", $this, $detail["sid"]);
+    Signal::getInstance()->emit("notifyTokencreated", $server, $detail["token"]);
 
     return $detail;
   }
@@ -369,7 +369,7 @@ class  extends
     $this->execute("serverdelete", array("sid" => $sid));
     $this->serverListReset();
 
-    ::getInstance()->emit("notifyServerdeleted", $this, $sid);
+    Signal::getInstance()->emit("notifyServerdeleted", $this, $sid);
   }
 
   /**
@@ -388,7 +388,7 @@ class  extends
     $this->execute("serverstart", array("sid" => $sid));
     $this->serverListReset();
 
-    ::getInstance()->emit("notifyServerstarted", $this, $sid);
+    Signal::getInstance()->emit("notifyServerstarted", $this, $sid);
   }
 
   /**
@@ -408,7 +408,7 @@ class  extends
     $this->execute("serverstop", array("sid" => $sid, "reasonmsg" => $msg));
     $this->serverListReset();
 
-    ::getInstance()->emit("notifyServerstopped", $this, $sid);
+    Signal::getInstance()->emit("notifyServerstopped", $this, $sid);
   }
 
   /**
@@ -419,13 +419,13 @@ class  extends
    */
   public function serverStopProcess($msg = null)
   {
-    ::getInstance()->emit("notifyServershutdown", $this);
+    Signal::getInstance()->emit("notifyServershutdown", $this);
 
     $this->execute("serverprocessstop", array("reasonmsg" => $msg));
   }
 
   /**
-   * Returns an array filled with  objects.
+   * Returns an array filled with Server objects.
    *
    * @param  array $filter
    * @return array
@@ -440,7 +440,7 @@ class  extends
 
       foreach($servers as $sid => $server)
       {
-        $this->serverList[$sid] = new ($this, $server);
+        $this->serverList[$sid] = new Server($this, $server);
       }
 
       $this->resetNodeList();
@@ -497,7 +497,7 @@ class  extends
       if(!$permdata["permname"]->startsWith("i_needed_modify_power_") && !isset($this->permissionList[$grantsid]))
       {
         $this->permissionList[$grantsid]["permid"]    = $this->permissionList[$permname]["permgrant"];
-        $this->permissionList[$grantsid]["permname"]  = ::factory($grantsid);
+        $this->permissionList[$grantsid]["permname"]  = StringHelper::factory($grantsid);
         $this->permissionList[$grantsid]["permdesc"]  = null;
         $this->permissionList[$grantsid]["permcatid"] = 0xFF;
         $this->permissionList[$grantsid]["permgrant"] = $this->permissionList[$permname]["permgrant"];
@@ -551,7 +551,7 @@ class  extends
     {
       $permtree[$val]["permcatid"]      = $val;
       $permtree[$val]["permcathex"]     = "0x" . dechex($val);
-      $permtree[$val]["permcatname"]    = ::factory(::permissionCategory($val));
+      $permtree[$val]["permcatname"]    = StringHelper::factory(Convert::permissionCategory($val));
       $permtree[$val]["permcatparent"]  = $permtree[$val]["permcathex"]{3} == 0 ? 0 : hexdec($permtree[$val]["permcathex"]{2} . 0);
       $permtree[$val]["permcatchilren"] = 0;
       $permtree[$val]["permcatcount"]   = 0;
@@ -603,14 +603,14 @@ class  extends
    * Returns the ID of the permission matching the given name.
    *
    * @param  string $name
-   * @throws 
+   * @throws Ts3Exception
    * @return integer
    */
   public function permissionGetIdByName($name)
   {
     if(!array_key_exists((string) $name, $this->permissionList()))
     {
-      throw new ("invalid permission ID", 0xA02);
+      throw new Ts3Exception("invalid permission ID", 0xA02);
     }
 
     return $this->permissionList[(string) $name]["permid"];
@@ -620,17 +620,17 @@ class  extends
    * Returns the name of the permission matching the given ID.
    *
    * @param  integer $permid
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return StringHelper
    */
   public function permissionGetNameById($permid)
   {
     foreach($this->permissionList() as $name => $perm)
     {
-      if($perm["permid"] == $permid) return new ($name);
+      if($perm["permid"] == $permid) return new StringHelper($name);
     }
 
-    throw new ("invalid permission ID", 0xA02);
+    throw new Ts3Exception("invalid permission ID", 0xA02);
   }
 
   /**
@@ -837,12 +837,12 @@ class  extends
     $this->execute("login", array("client_login_name" => $username, "client_login_password" => $password));
     $this->whoamiReset();
 
-    $crypt = new ($username);
+    $crypt = new Crypt($username);
 
     $this->setStorage("_login_user", $username);
     $this->setStorage("_login_pass", $crypt->encrypt($password));
 
-    ::getInstance()->emit("notifyLogin", $this);
+    Signal::getInstance()->emit("notifyLogin", $this);
   }
 
   /**
@@ -858,7 +858,7 @@ class  extends
     $this->delStorage("_login_user");
     $this->delStorage("_login_pass");
 
-    ::getInstance()->emit("notifyLogout", $this);
+    Signal::getInstance()->emit("notifyLogout", $this);
   }
 
   /**
@@ -959,7 +959,7 @@ class  extends
   {
     $this->whoami();
 
-    $this->whoami[$ident] = (is_numeric($value)) ? (int) $value : ::factory($value);
+    $this->whoami[$ident] = (is_numeric($value)) ? (int) $value : StringHelper::factory($value);
   }
 
   /**
@@ -1050,7 +1050,7 @@ class  extends
 
     foreach($reflects->getConstants() as $key => $val)
     {
-      if(!::factory($key)->startsWith("PERM_CAT") || $val == 0xFF)
+      if(!StringHelper::factory($key)->startsWith("PERM_CAT") || $val == 0xFF)
       {
         continue;
       }
@@ -1162,9 +1162,9 @@ class  extends
   }
 
   /**
-   * Returns the underlying  object.
+   * Returns the underlying ServerQuery object.
    *
-   * @return 
+   * @return ServerQuery
    */
   public function getAdapter()
   {
@@ -1214,7 +1214,7 @@ class  extends
 
     if($username && $password)
     {
-      $crypt = new ($username);
+      $crypt = new Crypt($username);
 
       $this->login($username, $crypt->decrypt($password));
     }

@@ -37,27 +37,27 @@ use TeamSpeak3\Node\Client;
 
 
 /**
- * @class 
+ * @class Json
  * @brief Generates a JSON struct used in JS-based TeamSpeak 3 viewers.
  */
-class  implements 
+class Json implements IViewer
 {
   /**
-   * Stores an array of data parsed from  objects.
+   * Stores an array of data parsed from AbstractNode objects.
    *
    * @var array
    */
   protected $data = null;
 
   /**
-   * The  object which is currently processed.
+   * The AbstractNode object which is currently processed.
    *
-   * @var 
+   * @var AbstractNode
    */
   protected $currObj = null;
 
   /**
-   * An array filled with siblings for the  object which is currently
+   * An array filled with siblings for the AbstractNode object which is currently
    * processed.
    *
    * @var array
@@ -65,7 +65,7 @@ class  implements
   protected $currSib = null;
 
   /**
-   * An internal counter indicating the depth of the  object previously
+   * An internal counter indicating the depth of the AbstractNode object previously
    * processed.
    *
    * @var integer
@@ -73,10 +73,10 @@ class  implements
   protected $lastLvl = 0;
 
   /**
-   * The  constructor.
+   * The Json constructor.
    *
    * @param  array $data
-   * @return 
+   * @return Json
    */
   public function __construct(array &$data = array())
   {
@@ -86,11 +86,11 @@ class  implements
   /**
    * Assembles an stdClass object for the current element.
    *
-   * @param   $node
+   * @param  AbstractNode $node
    * @param  array $siblings
    * @return void
    */
-  public function fetchObject( $node, array $siblings = array())
+  public function fetchObject(AbstractNode $node, array $siblings = array())
   {
     $this->currObj = $node;
     $this->currSib = $siblings;
@@ -120,15 +120,15 @@ class  implements
    */
   protected function getId()
   {
-    if($this->currObj instanceof )
+    if($this->currObj instanceof Server)
     {
       return "ts3_s" . $this->currObj->virtualserver_id;
     }
-    elseif($this->currObj instanceof )
+    elseif($this->currObj instanceof Channel)
     {
       return "ts3_c" . $this->currObj->cid;
     }
-    elseif($this->currObj instanceof )
+    elseif($this->currObj instanceof Client)
     {
       return "ts3_u" . $this->currObj->clid;
     }
@@ -143,11 +143,11 @@ class  implements
    */
   protected function getParent()
   {
-    if($this->currObj instanceof )
+    if($this->currObj instanceof Channel)
     {
       return $this->currObj->pid ? "ts3_c" . $this->currObj->pid : "ts3_s" . $this->currObj->getParent()->getId();
     }
-    elseif($this->currObj instanceof )
+    elseif($this->currObj instanceof Client)
     {
       return $this->currObj->cid ? "ts3_c" . $this->currObj->cid : "ts3_s" . $this->currObj->getParent()->getId();
     }
@@ -162,11 +162,11 @@ class  implements
    */
   protected function getLevel()
   {
-    if($this->currObj instanceof )
+    if($this->currObj instanceof Channel)
     {
       return $this->currObj->getLevel()+2;
     }
-    elseif($this->currObj instanceof )
+    elseif($this->currObj instanceof Client)
     {
       return $this->currObj->channelGetById($this->currObj->cid)->getLevel()+3;
     }
@@ -181,19 +181,19 @@ class  implements
    */
   protected function getType()
   {
-    if($this->currObj instanceof )
+    if($this->currObj instanceof Server)
     {
       return "server";
     }
-    elseif($this->currObj instanceof )
+    elseif($this->currObj instanceof Channel)
     {
       return "channel";
     }
-    elseif($this->currObj instanceof )
+    elseif($this->currObj instanceof Client)
     {
       return "client";
     }
-    elseif($this->currObj instanceof  || $this->currObj instanceof group)
+    elseif($this->currObj instanceof Servergroup || $this->currObj instanceof Channelgroup)
     {
       return "group";
     }
@@ -212,7 +212,7 @@ class  implements
   {
     $extras = "";
 
-    if($this->currObj instanceof  && $this->currObj->isSpacer())
+    if($this->currObj instanceof Channel && $this->currObj->isSpacer())
     {
       switch($this->currObj->spacerGetType())
       {
@@ -269,7 +269,7 @@ class  implements
   {
     $type = "";
 
-    if(!$this->currObj instanceof  || !$this->currObj->isSpacer())
+    if(!$this->currObj instanceof Channel || !$this->currObj->isSpacer())
     {
       return "none";
     }
@@ -332,11 +332,11 @@ class  implements
    */
   protected function getName()
   {
-    if($this->currObj instanceof  && $this->currObj->isSpacer())
+    if($this->currObj instanceof Channel && $this->currObj->isSpacer())
     {
       return $this->currObj["channel_name"]->section("]", 1, 99)->toString();
     }
-    elseif($this->currObj instanceof )
+    elseif($this->currObj instanceof Client)
     {
       $before = array();
       $behind = array();
@@ -368,7 +368,7 @@ class  implements
   {
     $props = new stdClass();
 
-    if($this->currObj instanceof )
+    if($this->currObj instanceof Host)
     {
       $this->id        = 0;
       $this->icon      = 0;
@@ -378,13 +378,13 @@ class  implements
       $props->slots    = $this->currObj->virtualservers_total_maxclients;
       $props->flags    = 0;
     }
-    elseif($this->currObj instanceof )
+    elseif($this->currObj instanceof Server)
     {
       $props->id       = $this->currObj->getId();
       $props->icon     = $this->currObj->virtualserver_icon_id < 0 ? pow(2, 32)-($this->currObj->virtualserver_icon_id*-1) : $this->currObj->virtualserver_icon_id;
       $props->welcmsg  = strlen($this->currObj->virtualserver_welcomemessage) ? trim($this->currObj->virtualserver_welcomemessage) : null;
       $props->hostmsg  = strlen($this->currObj->virtualserver_hostmessage) ? trim($this->currObj->virtualserver_hostmessage) : null;
-      $props->version  = ::versionShort($this->currObj->virtualserver_version)->toString();
+      $props->version  = Convert::versionShort($this->currObj->virtualserver_version)->toString();
       $props->platform = $this->currObj->virtualserver_platform->toString();
       $props->country  = null;
       $props->users    = $this->currObj->clientCount();
@@ -397,7 +397,7 @@ class  implements
       $props->flags += $this->currObj->virtualserver_weblist_enabled      ? 8  : 0;
       $props->flags += $this->currObj->virtualserver_ask_for_privilegekey ? 16 : 0;
     }
-    elseif($this->currObj instanceof )
+    elseif($this->currObj instanceof Channel)
     {
       $props->id       = $this->currObj->getId();
       $props->icon     = $this->currObj->isSpacer() ? 0 : $this->currObj->channel_icon_id < 0 ? pow(2, 32)-($this->currObj->channel_icon_id*-1) : $this->currObj->channel_icon_id;
@@ -420,11 +420,11 @@ class  implements
       $props->flags += $this->currObj->total_clients != -1            ? 64  : 0;
       $props->flags += $this->currObj->isSpacer()                     ? 128 : 0;
     }
-    elseif($this->currObj instanceof )
+    elseif($this->currObj instanceof Client)
     {
       $props->id       = $this->currObj->getId();
       $props->icon     = $this->currObj->client_icon_id < 0 ? pow(2, 32)-($this->currObj->client_icon_id*-1) : $this->currObj->client_icon_id;
-      $props->version  = ::versionShort($this->currObj->client_version)->toString();
+      $props->version  = Convert::versionShort($this->currObj->client_version)->toString();
       $props->platform = $this->currObj->client_platform->toString();
       $props->country  = strlen($this->currObj->client_country) ? trim($this->currObj->client_country) : null;
       $props->awaymesg = strlen($this->currObj->client_away_message) ? trim($this->currObj->client_away_message) : null;
@@ -445,7 +445,7 @@ class  implements
         $props->memberof[$num]->flags += $group->type == 2                             ? 4  : 0;
         $props->memberof[$num]->flags += $group->type == 0                             ? 8  : 0;
         $props->memberof[$num]->flags += $group->savedb                                ? 16 : 0;
-        $props->memberof[$num]->flags += $group instanceof  ? 32 : 0;
+        $props->memberof[$num]->flags += $group instanceof Servergroup ? 32 : 0;
       }
 
       $props->flags += $this->currObj->client_away                                                                                                                             ? 1   : 0;
@@ -457,7 +457,7 @@ class  implements
       $props->flags += $this->currObj->client_input_muted || !$this->currObj->client_input_hardware                                                                            ? 64  : 0;
       $props->flags += $this->currObj->client_output_muted || !$this->currObj->client_output_hardware                                                                          ? 128 : 0;
     }
-    elseif($this->currObj instanceof  || $this->currObj instanceof group)
+    elseif($this->currObj instanceof Servergroup || $this->currObj instanceof Channelgroup)
     {
       $props->id     = $this->currObj->getId();
       $props->icon   = $this->currObj->iconid < 0 ? pow(2, 32)-($this->currObj->iconid*-1) : $this->currObj->iconid;
@@ -470,7 +470,7 @@ class  implements
       $props->flags += $this->currObj->type == 2                             ? 4  : 0;
       $props->flags += $this->currObj->type == 0                             ? 8  : 0;
       $props->flags += $this->currObj->savedb                                ? 16 : 0;
-      $props->flags += $this->currObj instanceof  ? 32 : 0;
+      $props->flags += $this->currObj instanceof Servergroup ? 32 : 0;
     }
 
     return $props;

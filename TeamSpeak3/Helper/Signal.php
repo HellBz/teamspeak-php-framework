@@ -30,15 +30,15 @@ use TeamSpeak3\Ts3Exception;
 
 
 /**
- * @class 
+ * @class Signal
  * @brief Helper class for signal slots.
  */
-class 
+class Signal
 {
   /**
-   * Stores the  object.
+   * Stores the Signal object.
    *
-   * @var 
+   * @var Signal
    */
   protected static $instance = null;
 
@@ -91,7 +91,7 @@ class
   {
     if(!is_callable($callback, TRUE, $callable_name))
     {
-      throw new _Exception("invalid callback specified");
+      throw new Ts3Exception("invalid callback specified");
     }
     
     return md5($callable_name);
@@ -102,7 +102,7 @@ class
    *
    * @param  string $signal
    * @param  mixed  $callback
-   * @return _Handler
+   * @return Handler
    */
   public function subscribe($signal, $callback)
   {
@@ -115,7 +115,7 @@ class
 
     if(!array_key_exists($index, $this->sigslots[$signal]))
     {
-      $this->sigslots[$signal][$index] = new _Handler($signal, $callback);
+      $this->sigslots[$signal][$index] = new Handler($signal, $callback);
     }
 
     return $this->sigslots[$signal][$index];
@@ -204,9 +204,9 @@ class
   }
 
   /**
-   * Returns a singleton instance of .
+   * Returns a singleton instance of Signal.
    *
-   * @return 
+   * @return Signal
    */
   public static function getInstance()
   {

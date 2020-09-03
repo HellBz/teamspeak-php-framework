@@ -37,10 +37,10 @@ use TeamSpeak3\Viewer\IViewer;
 
 
 /**
- * @class 
+ * @class AbstractNode
  * @brief Abstract class describing a TeamSpeak 3 node and all it's parameters.
  */
-abstract class  implements RecursiveIterator, ArrayAccess, Countable
+abstract class AbstractNode implements RecursiveIterator, ArrayAccess, Countable
 {
   /**
    * @ignore
@@ -77,7 +77,7 @@ abstract class  implements RecursiveIterator, ArrayAccess, Countable
    *
    * @param  string  $cmd
    * @param  boolean $throw
-   * @return 
+   * @return Reply
    */
   public function request($cmd, $throw = TRUE)
   {
@@ -89,7 +89,7 @@ abstract class  implements RecursiveIterator, ArrayAccess, Countable
    *
    * @param  string $cmd
    * @param  array  $params
-   * @return 
+   * @return StringHelper
    */
   public function prepare($cmd, array $params = array())
   {
@@ -101,7 +101,7 @@ abstract class  implements RecursiveIterator, ArrayAccess, Countable
    *
    * @param  string $cmd
    * @param  array  $params
-   * @return 
+   * @return Reply
    */
   public function execute($cmd, array $params = array())
   {
@@ -111,8 +111,8 @@ abstract class  implements RecursiveIterator, ArrayAccess, Countable
   /**
    * Returns the parent object of the current node.
    *
-   * @return 
-   * @return 
+   * @return ServerQuery
+   * @return AbstractNode
    */
   public function getParent()
   {
@@ -144,13 +144,13 @@ abstract class  implements RecursiveIterator, ArrayAccess, Countable
    * Returns the internal path of the node icon.
    *
    * @param  string $key
-   * @return 
+   * @return StringHelper
    */
   public function iconGetName($key)
   {
     $iconid = ($this[$key] < 0) ? (pow(2, 32))-($this[$key]*-1) : $this[$key];
 
-    return new ("/icon_" . $iconid);
+    return new StringHelper("/icon_" . $iconid);
   }
 
   /**
@@ -161,16 +161,16 @@ abstract class  implements RecursiveIterator, ArrayAccess, Countable
    */
   public function getClass($prefix = "ts3_")
   {
-    if($this instanceof  && $this->isSpacer())
+    if($this instanceof Channel && $this->isSpacer())
     {
       return $prefix . "spacer";
     }
-    elseif($this instanceof  && $this["client_type"])
+    elseif($this instanceof Client && $this["client_type"])
     {
       return $prefix . "query";
     }
 
-    return $prefix . ::factory(get_class($this))->section("_", 2)->toLower();
+    return $prefix . StringHelper::factory(get_class($this))->section("_", 2)->toLower();
   }
 
   /**
@@ -197,10 +197,10 @@ abstract class  implements RecursiveIterator, ArrayAccess, Countable
   /**
    * Returns the HTML code to display a TeamSpeak 3 viewer.
    *
-   * @param   $viewer
+   * @param  IViewer $viewer
    * @return string
    */
-  public function getViewer( $viewer)
+  public function getViewer(IViewer $viewer)
   {
     $html = $viewer->fetchObject($this);
 
@@ -241,14 +241,14 @@ abstract class  implements RecursiveIterator, ArrayAccess, Countable
     {
       foreach($nodes as $node)
       {
-        if(!$node instanceof ) continue;
+        if(!$node instanceof AbstractNode) continue;
 
         $props = $node->getInfo(FALSE);
         $props = array_intersect_key($props, $rules);
 
         foreach($props as $key => $val)
         {
-          if($val instanceof )
+          if($val instanceof StringHelper)
           {
             $match = $val->contains($rules[$key], TRUE);
           }
@@ -289,15 +289,15 @@ abstract class  implements RecursiveIterator, ArrayAccess, Countable
 
       foreach($info as $key => $val)
       {
-        $key = ::factory($key);
+        $key = StringHelper::factory($key);
 
         if($key->contains("_bytes_"))
         {
-          $info[$key->toString()] = ::bytes($val);
+          $info[$key->toString()] = Convert::bytes($val);
         }
         elseif($key->contains("_bandwidth_"))
         {
-          $info[$key->toString()] = ::bytes($val) . "/s";
+          $info[$key->toString()] = Convert::bytes($val) . "/s";
         }
         elseif($key->contains("_packets_"))
         {
@@ -305,15 +305,15 @@ abstract class  implements RecursiveIterator, ArrayAccess, Countable
         }
         elseif($key->contains("_packetloss_"))
         {
-          $info[$key->toString()] = sprintf("%01.2f", floatval($val instanceof  ? $val->toString() : strval($val))*100) . "%";
+          $info[$key->toString()] = sprintf("%01.2f", floatval($val instanceof StringHelper ? $val->toString() : strval($val))*100) . "%";
         }
         elseif($key->endsWith("_uptime"))
         {
-          $info[$key->toString()] = ::seconds($val);
+          $info[$key->toString()] = Convert::seconds($val);
         }
         elseif($key->endsWith("_version"))
         {
-          $info[$key->toString()] = ::version($val);
+          $info[$key->toString()] = Convert::version($val);
         }
         elseif($key->endsWith("_icon_id"))
         {
@@ -384,17 +384,17 @@ abstract class  implements RecursiveIterator, ArrayAccess, Countable
    *
    * @param  string $name
    * @param  array  $args
-   * @throws 
+   * @throws Ts3Exception
    * @return mixed
    */
   public function __call($name, array $args)
   {
-    if($this->getParent() instanceof )
+    if($this->getParent() instanceof AbstractNode)
     {
       return call_user_func_array(array($this->getParent(), $name), $args);
     }
 
-    throw new ("node method '" . $name . "()' does not exist");
+    throw new Ts3Exception("node method '" . $name . "()' does not exist");
   }
 
   /**
@@ -595,7 +595,7 @@ abstract class  implements RecursiveIterator, ArrayAccess, Countable
 
     if(!$this->offsetExists($offset))
     {
-      throw new ("node '" . get_class($this) . "' has no property named '" . $offset . "'");
+      throw new Ts3Exception("node '" . get_class($this) . "' has no property named '" . $offset . "'");
     }
 
     return $this->nodeInfo[(string) $offset];
@@ -611,7 +611,7 @@ abstract class  implements RecursiveIterator, ArrayAccess, Countable
       return $this->modify(array((string) $offset => $value));
     }
 
-    throw new ("node '" . get_class($this) . "' is read only");
+    throw new Ts3Exception("node '" . get_class($this) . "' is read only");
   }
 
   /**

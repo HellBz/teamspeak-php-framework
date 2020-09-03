@@ -30,10 +30,10 @@ use TeamSpeak3\Node\AbstractNode;
 
 
 /**
- * @class 
+ * @class Text
  * @brief Renders nodes used in ASCII-based TeamSpeak 3 viewers.
  */
-class  implements 
+class Text implements IViewer
 {
   /**
    * A pre-defined pattern used to display a node in a TeamSpeak 3 viewer.
@@ -45,11 +45,11 @@ class  implements
   /**
    * Returns the code needed to display a node in a TeamSpeak 3 viewer.
    *
-   * @param   $node
+   * @param  AbstractNode $node
    * @param  array $siblings
    * @return string
    */
-  public function fetchObject( $node, array $siblings = array())
+  public function fetchObject(AbstractNode $node, array $siblings = array())
   {
     $this->currObj = $node;
     $this->currSib = $siblings;
@@ -60,7 +60,7 @@ class  implements
       $this->getCorpusName(),
     );
 
-    return ::factory($this->pattern)->arg($args);
+    return StringHelper::factory($this->pattern)->arg($args);
   }
 
   /**

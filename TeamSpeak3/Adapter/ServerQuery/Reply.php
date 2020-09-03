@@ -34,29 +34,29 @@ use \ArrayObject;
 
 
 /**
- * @class 
+ * @class Reply
  * @brief Provides methods to analyze and format a ServerQuery reply.
  */
-class 
+class Reply
 {
   /**
    * Stores the command used to get this reply.
    *
-   * @var 
+   * @var StringHelper
    */
   protected $cmd = null;
 
   /**
    * Stores the servers reply (if available).
    *
-   * @var 
+   * @var StringHelper
    */
   protected $rpl = null;
 
   /**
-   * Stores connected  object.
+   * Stores connected Host object.
    *
-   * @var 
+   * @var Host
    */
   protected $con = null;
 
@@ -82,17 +82,17 @@ class
   protected $exp = TRUE;
 
   /**
-   * Creates a new  object.
+   * Creates a new Reply object.
    *
    * @param  array   $rpl
    * @param  string  $cmd
    * @param  boolean $exp
-   * @param   $con
-   * @return 
+   * @param  Host $con
+   * @return Reply
    */
-  public function __construct(array $rpl, $cmd = null,  $con = null, $exp = TRUE)
+  public function __construct(array $rpl, $cmd = null, Host $con = null, $exp = TRUE)
   {
-    $this->cmd = new ($cmd);
+    $this->cmd = new StringHelper($cmd);
     $this->con = $con;
     $this->exp = (bool) $exp;
     
@@ -101,9 +101,9 @@ class
   }
 
   /**
-   * Returns the reply as an  object.
+   * Returns the reply as an StringHelper object.
    *
-   * @return 
+   * @return StringHelper
    */
   public function toString()
   {
@@ -208,7 +208,7 @@ class
       }
       else
       {
-        throw new ("invalid parameter", 0x602);
+        throw new Ts3Exception("invalid parameter", 0x602);
       }
     }
 
@@ -252,11 +252,11 @@ class
   /**
    * Returns the command used to get this reply.
    *
-   * @return 
+   * @return StringHelper
    */
   public function getCommandString()
   {
-    return new ($this->cmd);
+    return new StringHelper($this->cmd);
   }
 
   /**
@@ -282,11 +282,11 @@ class
   }
 
   /**
-   * Parses a ServerQuery error and throws a  object if
+   * Parses a ServerQuery error and throws a Ts3Exception object if
    * there's an error.
    *
    * @param  string $err
-   * @throws 
+   * @throws Ts3Exception
    * @return void
    */
   protected function fetchError($err)
@@ -300,7 +300,7 @@ class
       $this->err[$ident->toString()] = $value->isInt() ? $value->toInt() : $value->unescape();
     }
 
-    ::getInstance()->emit("notifyError", $this);
+    Signal::getInstance()->emit("notifyError", $this);
 
     if($this->getErrorProperty("id", 0x00) != 0x00 && $this->exp)
     {
@@ -324,12 +324,12 @@ class
         $suffix = "";
       }
       
-      throw new ($this->getErrorProperty("msg") . $suffix, $this->getErrorProperty("id"), $this->getErrorProperty("return_code"));
+      throw new Ts3Exception($this->getErrorProperty("msg") . $suffix, $this->getErrorProperty("id"), $this->getErrorProperty("return_code"));
     }
   }
 
   /**
-   * Parses a ServerQuery reply and creates a  object.
+   * Parses a ServerQuery reply and creates a StringHelper object.
    *
    * @param  string $rpl
    * @return void
@@ -344,11 +344,11 @@ class
       }
       elseif($val->startsWith(TeamSpeak3::EVENT))
       {
-        $this->evt[] = new ($rpl[$key], $this->con);
+        $this->evt[] = new Event($rpl[$key], $this->con);
         unset($rpl[$key]);
       }
     }
 
-    $this->rpl = new (implode(TeamSpeak3::SEPARATOR_LIST, $rpl));
+    $this->rpl = new StringHelper(implode(TeamSpeak3::SEPARATOR_LIST, $rpl));
   }
 }

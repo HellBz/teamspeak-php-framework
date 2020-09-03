@@ -29,38 +29,38 @@ use TeamSpeak3\TeamSpeak3;
 
 
 /**
- * @class 
+ * @class Channel
  * @brief Class describing a TeamSpeak 3 channel and all it's parameters.
  */
 class class Channel extends AbstractNode
 {
   /**
-   * The  constructor.
+   * The Channel constructor.
    *
-   * @param   $server
+   * @param  Server $server
    * @param  array  $info
    * @param  string $index
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Channel
    */
-  public function __construct( $server, array $info, $index = "cid")
+  public function __construct(Server $server, array $info, $index = "cid")
   {
     $this->parent = $server;
     $this->nodeInfo = $info;
 
     if(!array_key_exists($index, $this->nodeInfo))
     {
-      throw new ("invalid channelID", 0x300);
+      throw new Ts3Exception("invalid channelID", 0x300);
     }
 
     $this->nodeId = $this->nodeInfo[$index];
   }
 
   /**
-   * Returns an array filled with  objects.
+   * Returns an array filled with Channel objects.
    *
    * @param  array $filter
-   * @return array|[]
+   * @return array|Channel[]
    */
   public function subChannelList(array $filter = array())
   {
@@ -78,28 +78,28 @@ class class Channel extends AbstractNode
   }
 
   /**
-   * Returns the  object matching the given ID.
+   * Returns the Channel object matching the given ID.
    *
    * @param  integer $cid
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Channel
    */
   public function subChannelGetById($cid)
   {
     if(!array_key_exists((int) $cid, $this->subChannelList()))
     {
-      throw new ("invalid channelID", 0x300);
+      throw new Ts3Exception("invalid channelID", 0x300);
     }
 
     return $this->channelList[(int) $cid];
   }
 
   /**
-   * Returns the  object matching the given name.
+   * Returns the Channel object matching the given name.
    *
    * @param  integer $name
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Channel
    */
   public function subChannelGetByName($name)
   {
@@ -108,14 +108,14 @@ class class Channel extends AbstractNode
       if($channel["channel_name"] == $name) return $channel;
     }
 
-    throw new ("invalid channelID", 0x300);
+    throw new Ts3Exception("invalid channelID", 0x300);
   }
 
   /**
-   * Returns an array filled with  objects.
+   * Returns an array filled with Client objects.
    *
    * @param  array $filter
-   * @return array | []
+   * @return array | Client[]
    */
   public function clientList(array $filter = array())
   {
@@ -133,28 +133,28 @@ class class Channel extends AbstractNode
   }
 
   /**
-   * Returns the  object matching the given ID.
+   * Returns the Client object matching the given ID.
    *
    * @param  integer $clid
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Client
    */
   public function clientGetById($clid)
   {
     if(!array_key_exists($clid, $this->clientList()))
     {
-      throw new ("invalid clientID", 0x200);
+      throw new Ts3Exception("invalid clientID", 0x200);
     }
 
     return $this->clientList[intval($clid)];
   }
 
   /**
-   * Returns the  object matching the given name.
+   * Returns the Client object matching the given name.
    *
    * @param  integer $name
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Client
    */
   public function clientGetByName($name)
   {
@@ -163,7 +163,7 @@ class class Channel extends AbstractNode
       if($client["client_nickname"] == $name) return $client;
     }
 
-    throw new ("invalid clientID", 0x200);
+    throw new Ts3Exception("invalid clientID", 0x200);
   }
 
   /**
@@ -397,7 +397,7 @@ class class Channel extends AbstractNode
   /**
    * Downloads and returns the channels icon file content.
    *
-   * @return 
+   * @return StringHelper
    */
   public function iconDownload()
   {

@@ -29,10 +29,10 @@ use TeamSpeak3\Ts3Exception;
 
 
 /**
- * @class 
+ * @class Uri
  * @brief Helper class for URI handling.
  */
-class 
+class Uri
 {
   /**
    * Stores the URI scheme.
@@ -98,11 +98,11 @@ class
   protected $regex = array();
 
   /**
-   * The  constructor.
+   * The Uri constructor.
    *
    * @param  string $uri
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Uri
    */
   public function __construct($uri)
   {
@@ -113,7 +113,7 @@ class
 
     if(!ctype_alnum($this->scheme))
     {
-      throw new ("invalid URI scheme '" . $this->scheme . "' supplied");
+      throw new Ts3Exception("invalid URI scheme '" . $this->scheme . "' supplied");
     }
 
     /* grammar rules for validation */
@@ -133,14 +133,14 @@ class
 
     if(!$this->isValid())
     {
-      throw new ("invalid URI supplied");
+      throw new Ts3Exception("invalid URI supplied");
     }
   }
 
   /**
    * Parses the scheme-specific portion of the URI and place its parts into instance variables.
    *
-   * @throws 
+   * @throws Ts3Exception
    * @return void
    */
   protected function parseUri($uriString = '')
@@ -149,7 +149,7 @@ class
 
     if($status === FALSE)
     {
-      throw new ("URI scheme-specific decomposition failed");
+      throw new Ts3Exception("URI scheme-specific decomposition failed");
     }
 
     if(!$status) return;
@@ -162,7 +162,7 @@ class
 
     if($status === FALSE)
     {
-      throw new ("URI scheme-specific authority decomposition failed");
+      throw new Ts3Exception("URI scheme-specific authority decomposition failed");
     }
 
     if(!$status) return;
@@ -217,18 +217,18 @@ class
    * Returns the scheme.
    *
    * @param  mixed default
-   * @return 
+   * @return StringHelper
    */
   public function getScheme($default = null)
   {
-    return ($this->hasScheme()) ? new ($this->scheme) : $default;
+    return ($this->hasScheme()) ? new StringHelper($this->scheme) : $default;
   }
 
   /**
    * Returns TRUE if the username is valid.
    *
    * @param  string $username
-   * @throws 
+   * @throws Ts3Exception
    * @return boolean
    */
   public function checkUser($username = null)
@@ -248,7 +248,7 @@ class
 
     if($status === FALSE)
     {
-      throw new ("URI username validation failed");
+      throw new Ts3Exception("URI username validation failed");
     }
 
     return ($status == 1);
@@ -268,18 +268,18 @@ class
    * Returns the username.
    *
    * @param  mixed default
-   * @return 
+   * @return StringHelper
    */
   public function getUser($default = null)
   {
-    return ($this->hasUser()) ? new (urldecode($this->user)) : $default;
+    return ($this->hasUser()) ? new StringHelper(urldecode($this->user)) : $default;
   }
 
   /**
    * Returns TRUE if the password is valid.
    *
    * @param  string $password
-   * @throws 
+   * @throws Ts3Exception
    * @return boolean
    */
   public function checkPass($password = null)
@@ -298,7 +298,7 @@ class
 
     if($status === FALSE)
     {
-      throw new ("URI password validation failed");
+      throw new Ts3Exception("URI password validation failed");
     }
 
     return ($status == 1);
@@ -318,11 +318,11 @@ class
    * Returns the password.
    *
    * @param  mixed default
-   * @return 
+   * @return StringHelper
    */
   public function getPass($default = null)
   {
-    return ($this->hasPass()) ? new (urldecode($this->pass)) : $default;
+    return ($this->hasPass()) ? new StringHelper(urldecode($this->pass)) : $default;
   }
 
   /**
@@ -358,11 +358,11 @@ class
    * Returns the host.
    *
    * @param  mixed default
-   * @return 
+   * @return StringHelper
    */
   public function getHost($default = null)
   {
-    return ($this->hasHost()) ? new (rawurldecode($this->host)) : $default;
+    return ($this->hasHost()) ? new StringHelper(rawurldecode($this->host)) : $default;
   }
 
   /**
@@ -409,7 +409,7 @@ class
    * Returns TRUE if the path is valid.
    *
    * @param  string $path
-   * @throws 
+   * @throws Ts3Exception
    * @return boolean
    */
   public function checkPath($path = null)
@@ -429,7 +429,7 @@ class
 
     if($status === FALSE)
     {
-      throw new ("URI path validation failed");
+      throw new Ts3Exception("URI path validation failed");
     }
 
     return ($status == 1);
@@ -449,18 +449,18 @@ class
    * Returns the path.
    *
    * @param  mixed default
-   * @return 
+   * @return StringHelper
    */
   public function getPath($default = null)
   {
-    return ($this->hasPath()) ? new (rawurldecode($this->path)) : $default;
+    return ($this->hasPath()) ? new StringHelper(rawurldecode($this->path)) : $default;
   }
 
   /**
    * Returns TRUE if the query string is valid.
    *
    * @param  string $query
-   * @throws 
+   * @throws Ts3Exception
    * @return boolean
    */
   public function checkQuery($query = null)
@@ -480,7 +480,7 @@ class
 
     if($status === FALSE)
     {
-      throw new ("URI query string validation failed");
+      throw new Ts3Exception("URI query string validation failed");
     }
 
     return ($status == 1);
@@ -551,7 +551,7 @@ class
       }
       elseif(is_string($val))
       {
-        return new ($val);
+        return new StringHelper($val);
       }
       else
       {
@@ -566,7 +566,7 @@ class
    * Returns TRUE if the fragment string is valid.
    *
    * @param  string $fragment
-   * @throws 
+   * @throws Ts3Exception
    * @return boolean
    */
   public function checkFragment($fragment = null)
@@ -586,7 +586,7 @@ class
 
     if($status === FALSE)
     {
-      throw new ("URI fragment validation failed");
+      throw new Ts3Exception("URI fragment validation failed");
     }
 
     return ($status == 1);
@@ -606,11 +606,11 @@ class
    * Returns the fragment.
    *
    * @param  mixed default
-   * @return 
+   * @return StringHelper
    */
   public function getFragment($default = null)
   {
-    return ($this->hasFragment()) ? new (rawurldecode($this->fragment)) : $default;
+    return ($this->hasFragment()) ? new StringHelper(rawurldecode($this->fragment)) : $default;
   }
 
   /**
@@ -673,13 +673,13 @@ class
   /**
    * Returns the applications host address.
    *
-   * @return 
+   * @return StringHelper
    */
   public static function getHostUri()
   {
     $sheme = (self::getHostParam("HTTPS") == "on") ? "https" : "http";
 
-    $serverName = new (self::getHostParam("HTTP_HOST"));
+    $serverName = new StringHelper(self::getHostParam("HTTP_HOST"));
     $serverPort = self::getHostParam("SERVER_PORT");
     $serverPort = ($serverPort != 80 && $serverPort != 443) ? ":" . $serverPort : "";
 
@@ -688,7 +688,7 @@ class
       $serverName = $serverName->replace($serverPort, "");
     }
 
-    return new ($sheme . "://" . $serverName . $serverPort);
+    return new StringHelper($sheme . "://" . $serverName . $serverPort);
   }
 
   /**
@@ -698,7 +698,7 @@ class
    */
   public static function getBaseUri()
   {
-    $scriptPath = new (dirname(self::getHostParam("SCRIPT_NAME")));
+    $scriptPath = new StringHelper(dirname(self::getHostParam("SCRIPT_NAME")));
 
     return self::getHostUri()->append(($scriptPath == DIRECTORY_SEPARATOR ? "" : $scriptPath) . "/");
   }

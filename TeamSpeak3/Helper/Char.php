@@ -29,10 +29,10 @@ use TeamSpeak3\Ts3Exception;
 
 
 /**
- * @class 
+ * @class Char
  * @brief Helper class for char handling.
  */
-class 
+class Char
 {
   /**
    * Stores the original character.
@@ -42,17 +42,17 @@ class
   protected $char = null;
 
   /**
-   * The  constructor.
+   * The Char constructor.
    *
    * @param  string $var
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Char
    */
   public function __construct($char)
   {
     if(strlen($char) != 1)
     {
-      throw new ("char parameter may not contain more or less than one character");
+      throw new Ts3Exception("char parameter may not contain more or less than one character");
     }
 
     $this->char = strval($char);
@@ -151,7 +151,7 @@ class
   /**
    * Returns the uppercase equivalent if the character is lowercase.
    *
-   * @return 
+   * @return Char
    */
   public function toUpper()
   {
@@ -161,7 +161,7 @@ class
   /**
    * Returns the lowercase equivalent if the character is uppercase.
    *
-   * @return 
+   * @return Char
    */
   public function toLower()
   {
@@ -224,17 +224,17 @@ class
   }
 
   /**
-   * Returns the  based on a given hex value.
+   * Returns the Char based on a given hex value.
    *
    * @param  string $hex
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Char
    */
   public static function fromHex($hex)
   {
     if(strlen($hex) != 2)
     {
-      throw new ("given parameter '" . $hex . "' is not a valid hexadecimal number");
+      throw new Ts3Exception("given parameter '" . $hex . "' is not a valid hexadecimal number");
     }
 
     return new self(chr(hexdec($hex)));

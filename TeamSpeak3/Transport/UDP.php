@@ -31,15 +31,15 @@ use TeamSpeak3\Ts3Exception;
 
 
 /**
- * @class 
+ * @class UDP
  * @brief Class for connecting to a remote server through UDP.
  */
-class  extends 
+class UDP extends AbstractTransport
 {
   /**
    * Connects to a remote server.
    *
-   * @throws 
+   * @throws Ts3Exception
    * @return void
    */
   public function connect()
@@ -56,7 +56,7 @@ class  extends
 
     if($this->stream === FALSE)
     {
-      throw new (::factory($errstr)->toUtf8()->toString(), $errno);
+      throw new Ts3Exception(StringHelper::factory($errstr)->toUtf8()->toString(), $errno);
     }
 
     @stream_set_timeout($this->stream, $timeout);
@@ -74,15 +74,15 @@ class  extends
 
     $this->stream = null;
 
-    ::getInstance()->emit(strtolower($this->getAdapterType()) . "Disconnected");
+    Signal::getInstance()->emit(strtolower($this->getAdapterType()) . "Disconnected");
   }
 
   /**
    * Reads data from the stream.
    *
    * @param  integer $length
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return StringHelper
    */
   public function read($length = 4096)
   {
@@ -91,14 +91,14 @@ class  extends
 
     $data = @fread($this->stream, $length);
 
-    ::getInstance()->emit(strtolower($this->getAdapterType()) . "DataRead", $data);
+    Signal::getInstance()->emit(strtolower($this->getAdapterType()) . "DataRead", $data);
 
     if($data === FALSE)
     {
-      throw new ("connection to server '" . $this->config["host"] . ":" . $this->config["port"] . "' lost");
+      throw new Ts3Exception("connection to server '" . $this->config["host"] . ":" . $this->config["port"] . "' lost");
     }
 
-    return new ($data);
+    return new StringHelper($data);
   }
 
   /**
@@ -113,6 +113,6 @@ class  extends
 
     @stream_socket_sendto($this->stream, $data);
 
-    ::getInstance()->emit(strtolower($this->getAdapterType()) . "DataSend", $data);
+    Signal::getInstance()->emit(strtolower($this->getAdapterType()) . "DataSend", $data);
   }
 }

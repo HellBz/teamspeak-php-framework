@@ -33,10 +33,10 @@ use TeamSpeak3\Ts3Exception;
 
 
 /**
- * @class 
+ * @class Server
  * @brief Class describing a TeamSpeak 3 virtual server and all it's parameters.
  */
-class  extends 
+class Server extends AbstractNode
 {
   /**
    * @ignore
@@ -59,22 +59,22 @@ class  extends
   protected $cgroupList = null;
 
   /**
-   * The  constructor.
+   * The Server constructor.
    *
-   * @param   $host
+   * @param  Host $host
    * @param  array  $info
    * @param  string $index
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Server
    */
-  public function __construct( $host, array $info, $index = "virtualserver_id")
+  public function __construct(Host $host, array $info, $index = "virtualserver_id")
   {
     $this->parent   = $host;
     $this->nodeInfo = $info;
 
     if(!array_key_exists($index, $this->nodeInfo))
     {
-      throw new ("invalid serverID", 0x400);
+      throw new Ts3Exception("invalid serverID", 0x400);
     }
 
     $this->nodeId = $this->nodeInfo[$index];
@@ -85,7 +85,7 @@ class  extends
    *
    * @param  string  $cmd
    * @param  boolean $throw
-   * @return 
+   * @return Reply
    */
   public function request($cmd, $throw = TRUE)
   {
@@ -98,10 +98,10 @@ class  extends
   }
 
   /**
-   * Returns an array filled with  objects.
+   * Returns an array filled with Channel objects.
    *
    * @param  array $filter
-   * @return array|[]
+   * @return array|Channel[]
    */
   public function channelList(array $filter = array())
   {
@@ -113,7 +113,7 @@ class  extends
 
       foreach($channels as $cid => $channel)
       {
-        $this->channelList[$cid] = new ($this, $channel);
+        $this->channelList[$cid] = new Channel($this, $channel);
       }
 
       $this->resetNodeList();
@@ -134,10 +134,10 @@ class  extends
   }
 
   /**
-   * Returns the  object representing the default channel.
+   * Returns the Channel object representing the default channel.
    *
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Channel
    */
   public function channelGetDefault()
   {
@@ -146,7 +146,7 @@ class  extends
       if($channel["channel_flag_default"]) return $channel;
     }
 
-    throw new ("invalid channelID", 0x300);
+    throw new Ts3Exception("invalid channelID", 0x300);
   }
 
   /**
@@ -180,7 +180,7 @@ class  extends
     $this->execute("channeldelete", array("cid" => $cid, "force" => $force));
     $this->channelListReset();
 
-    if(($cid instanceof  ? $cid->getId() : $cid) == $this->whoamiGet("client_channel_id"))
+    if(($cid instanceof AbstractNode ? $cid->getId() : $cid) == $this->whoamiGet("client_channel_id"))
     {
       $this->getParent()->whoamiReset();
     }
@@ -201,12 +201,12 @@ class  extends
   }
 
   /**
-   * Returns TRUE if the given  object is a spacer.
+   * Returns TRUE if the given Channel object is a spacer.
    *
-   * @param   $channel
+   * @param  Channel $channel
    * @return boolean
    */
-  public function channelIsSpacer( $channel)
+  public function channelIsSpacer(Channel $channel)
   {
     return (preg_match("/\[[^\]]*spacer[^\]]*\]/", $channel) && $channel["channel_flag_permanent"] && !$channel["pid"]) ? TRUE : FALSE;
   }
@@ -220,7 +220,7 @@ class  extends
    * @param  integer $align
    * @param  integer $order
    * @param  integer $maxclients
-   * @throws 
+   * @throws Ts3Exception
    * @return integer
    */
   public function channelSpacerCreate($ident, $type = TeamSpeak3::SPACER_SOLIDLINE, $align = TeamSpeak3::SPACER_ALIGN_REPEAT, $order = null, $maxclients = 0)
@@ -256,7 +256,7 @@ class  extends
         break;
 
       default:
-        throw new ("missing required parameter", 0x606);
+        throw new Ts3Exception("missing required parameter", 0x606);
         break;
     }
 
@@ -294,7 +294,7 @@ class  extends
    * Returns the possible type of a channel spacer.
    *
    * @param  integer $cid
-   * @throws 
+   * @throws Ts3Exception
    * @return integer
    */
   public function channelSpacerGetType($cid)
@@ -303,7 +303,7 @@ class  extends
 
     if(!$this->channelIsSpacer($channel))
     {
-      throw new ("invalid channel flags", 0x307);
+      throw new Ts3Exception("invalid channel flags", 0x307);
     }
 
     switch($channel["channel_name"]->section("]", 1))
@@ -332,7 +332,7 @@ class  extends
    * Returns the possible alignment of a channel spacer.
    *
    * @param  integer $cid
-   * @throws 
+   * @throws Ts3Exception
    * @return integer
    */
   public function channelSpacerGetAlign($cid)
@@ -341,7 +341,7 @@ class  extends
 
     if(!$this->channelIsSpacer($channel) || !preg_match("/\[(.*)spacer.*\]/", $channel, $matches) || !isset($matches[1]))
     {
-      throw new ("invalid channel flags", 0x307);
+      throw new Ts3Exception("invalid channel flags", 0x307);
     }
 
     switch($matches[1])
@@ -494,7 +494,7 @@ class  extends
       $files[$i]["sid"]  = $this->getId();
       $files[$i]["cid"]  = $files[0]["cid"];
       $files[$i]["path"] = $files[0]["path"];
-      $files[$i]["src"]  = new ($cid ? $files[$i]["path"] : "/");
+      $files[$i]["src"]  = new StringHelper($cid ? $files[$i]["path"] : "/");
 
       if(!$files[$i]["src"]->endsWith("/"))
       {
@@ -611,28 +611,28 @@ class  extends
   }
 
   /**
-   * Returns the  object matching the given ID.
+   * Returns the Channel object matching the given ID.
    *
    * @param  integer $cid
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Channel
    */
   public function channelGetById($cid)
   {
     if(!array_key_exists((string) $cid, $this->channelList()))
     {
-      throw new ("invalid channelID", 0x300);
+      throw new Ts3Exception("invalid channelID", 0x300);
     }
 
     return $this->channelList[intval((string) $cid)];
   }
 
   /**
-   * Returns the  object matching the given name.
+   * Returns the Channel object matching the given name.
    *
    * @param  string $name
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Channel
    */
   public function channelGetByName($name)
   {
@@ -641,14 +641,14 @@ class  extends
       if($channel["channel_name"] == $name) return $channel;
     }
 
-    throw new ("invalid channelID", 0x300);
+    throw new Ts3Exception("invalid channelID", 0x300);
   }
 
   /**
-   * Returns an array filled with  objects.
+   * Returns an array filled with Client objects.
    *
    * @param  array $filter
-   * @return array|[]
+   * @return array|Client[]
    */
   public function clientList(array $filter = array())
   {
@@ -662,7 +662,7 @@ class  extends
       {
         if($this->getParent()->getExcludeQueryClients() && $client["client_type"]) continue;
 
-        $this->clientList[$clid] = new ($this, $client);
+        $this->clientList[$clid] = new Client($this, $client);
       }
 
       uasort($this->clientList, array(__CLASS__, "sortClientList"));
@@ -755,28 +755,28 @@ class  extends
   }
 
   /**
-   * Returns the  object matching the given ID.
+   * Returns the Client object matching the given ID.
    *
    * @param  integer $clid
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Client
    */
   public function clientGetById($clid)
   {
     if(!array_key_exists((string) $clid, $this->clientList()))
     {
-      throw new ("invalid clientID", 0x200);
+      throw new Ts3Exception("invalid clientID", 0x200);
     }
 
     return $this->clientList[intval((string) $clid)];
   }
 
   /**
-   * Returns the  object matching the given name.
+   * Returns the Client object matching the given name.
    *
    * @param  string $name
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Client
    */
   public function clientGetByName($name)
   {
@@ -785,15 +785,15 @@ class  extends
       if($client["client_nickname"] == $name) return $client;
     }
 
-    throw new ("invalid clientID", 0x200);
+    throw new Ts3Exception("invalid clientID", 0x200);
   }
 
   /**
-   * Returns the  object matching the given unique identifier.
+   * Returns the Client object matching the given unique identifier.
    *
    * @param  string $uid
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Client
    */
   public function clientGetByUid($uid)
   {
@@ -802,15 +802,15 @@ class  extends
       if($client["client_unique_identifier"] == $uid) return $client;
     }
 
-    throw new ("invalid clientID", 0x200);
+    throw new Ts3Exception("invalid clientID", 0x200);
   }
   
   /**
-   * Returns the  object matching the given database ID.
+   * Returns the Client object matching the given database ID.
    *
    * @param  integer $dbid
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Client
    */
   public function clientGetByDbid($dbid)
   {
@@ -819,7 +819,7 @@ class  extends
       if($client["client_database_id"] == $dbid) return $client;
     }
 
-    throw new ("invalid clientID", 0x200);
+    throw new Ts3Exception("invalid clientID", 0x200);
   }
 
   /**
@@ -884,12 +884,12 @@ class  extends
 
     $this->execute("clientmove", array("clid" => $clid, "cid" => $cid, "cpw" => $cpw));
 
-    if($clid instanceof )
+    if($clid instanceof AbstractNode)
     {
       $clid = $clid->getId();
     }
 
-    if($cid instanceof )
+    if($cid instanceof AbstractNode)
     {
       $cid = $cid->getId();
     }
@@ -1046,7 +1046,7 @@ class  extends
    * Returns a list of server groups available.
    *
    * @param  filter $filter
-   * @return array|[]
+   * @return array|Servergroup[]
    */
   public function serverGroupList(array $filter = array())
   {
@@ -1056,7 +1056,7 @@ class  extends
 
       foreach($this->sgroupList as $sgid => $group)
       {
-        $this->sgroupList[$sgid] = new ($this, $group);
+        $this->sgroupList[$sgid] = new Servergroup($this, $group);
       }
 
       uasort($this->sgroupList, array(__CLASS__, "sortGroupList"));
@@ -1144,29 +1144,29 @@ class  extends
   }
 
   /**
-   * Returns the  object matching the given ID.
+   * Returns the Servergroup object matching the given ID.
    *
    * @param  integer $sgid
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Servergroup
    */
   public function serverGroupGetById($sgid)
   {
     if(!array_key_exists((string) $sgid, $this->serverGroupList()))
     {
-      throw new ("invalid groupID", 0xA00);
+      throw new Ts3Exception("invalid groupID", 0xA00);
     }
 
     return $this->sgroupList[intval((string) $sgid)];
   }
 
   /**
-   * Returns the  object matching the given name.
+   * Returns the Servergroup object matching the given name.
    *
    * @param  string  $name
    * @param  integer $type
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Servergroup
    */
   public function serverGroupGetByName($name, $type = TeamSpeak3::GROUP_DBTYPE_REGULAR)
   {
@@ -1175,7 +1175,7 @@ class  extends
       if($group["name"] == $name && $group["type"] == $type) return $group;
     }
 
-    throw new ("invalid groupID", 0xA00);
+    throw new Ts3Exception("invalid groupID", 0xA00);
   }
 
   /**
@@ -1323,7 +1323,7 @@ class  extends
         $perms = $this->serverGroupPermList($sgid, TRUE);
         $grant = isset($perms["i_permission_modify_power"]) ? $perms["i_permission_modify_power"]["permvalue"] : null;
       }
-      catch( $e)
+      catch(Ts3Exception $e)
       {
         /* ERROR_database_empty_result */
         if($e->getCode() != 0x501) throw $e;
@@ -1338,7 +1338,7 @@ class  extends
         {
           $profiles[$sgid][$permsid] = $perm["permvalue"];
         }
-        elseif(::factory($permsid)->startsWith("i_needed_modify_power_"))
+        elseif(StringHelper::factory($permsid)->startsWith("i_needed_modify_power_"))
         {
           if(!$grant || $perm["permvalue"] > $grant) continue;
 
@@ -1359,7 +1359,7 @@ class  extends
    *
    * @param  integer $mode
    * @param  integer $type
-   * @return 
+   * @return Servergroup
    */
   public function serverGroupIdentify($mode = TeamSpeak3::GROUP_IDENTIFIY_STRONGEST, $type = TeamSpeak3::GROUP_DBTYPE_REGULAR)
   {
@@ -1374,7 +1374,7 @@ class  extends
    * Returns a list of channel groups available.
    *
    * @param  array $filter
-   * @return array|group[]
+   * @return array|Channelgroup[]
    */
   public function channelGroupList(array $filter = array())
   {
@@ -1384,7 +1384,7 @@ class  extends
 
       foreach($this->cgroupList as $cgid => $group)
       {
-        $this->cgroupList[$cgid] = new group($this, $group);
+        $this->cgroupList[$cgid] = new Channelgroup($this, $group);
       }
 
       uasort($this->cgroupList, array(__CLASS__, "sortGroupList"));
@@ -1472,29 +1472,29 @@ class  extends
   }
 
   /**
-   * Returns the group object matching the given ID.
+   * Returns the Channelgroup object matching the given ID.
    *
    * @param  integer $cgid
-   * @throws 
-   * @return group
+   * @throws Ts3Exception
+   * @return Channelgroup
    */
   public function channelGroupGetById($cgid)
   {
     if(!array_key_exists((string) $cgid, $this->channelGroupList()))
     {
-      throw new ("invalid groupID", 0xA00);
+      throw new Ts3Exception("invalid groupID", 0xA00);
     }
 
     return $this->cgroupList[intval((string) $cgid)];
   }
 
   /**
-   * Returns the group object matching the given name.
+   * Returns the Channelgroup object matching the given name.
    *
    * @param  string  $name
    * @param  integer $type
-   * @throws 
-   * @return group
+   * @throws Ts3Exception
+   * @return Channelgroup
    */
   public function channelGroupGetByName($name, $type = TeamSpeak3::GROUP_DBTYPE_REGULAR)
   {
@@ -1503,7 +1503,7 @@ class  extends
       if($group["name"] == $name && $group["type"] == $type) return $group;
     }
 
-    throw new ("invalid groupID", 0xA00);
+    throw new Ts3Exception("invalid groupID", 0xA00);
   }
 
   /**
@@ -1585,7 +1585,7 @@ class  extends
     {
       $result = $this->execute("channelgroupclientlist", array("cgid" => $cgid, "cid" => $cid, "cldbid" => $cldbid))->toArray();
     }
-    catch( $e)
+    catch(Ts3Exception $e)
     {
       /* ERROR_database_empty_result */
       if($e->getCode() != 0x501) throw $e;
@@ -1608,13 +1608,13 @@ class  extends
    * Restores the default permission settings on the virtual server and returns a new initial
    * administrator privilege key.
    *
-   * @return 
+   * @return StringHelper
    */
   public function permReset()
   {
     $token = $this->request("permreset")->toList();
 
-    ::getInstance()->emit("notifyTokencreated", $this, $token["token"]);
+    Signal::getInstance()->emit("notifyTokencreated", $this, $token["token"]);
 
     return $token["token"];
   }
@@ -1655,7 +1655,7 @@ class  extends
           break;
 
         default:
-          throw new ("convert error", 0x604);
+          throw new Ts3Exception("convert error", 0x604);
       }
     }
 
@@ -1672,7 +1672,7 @@ class  extends
    * @param  string  $cpw
    * @param  boolean $overwrite
    * @param  boolean $resume
-   * @throws 
+   * @throws Ts3Exception
    * @return array
    */
   public function transferInitUpload($clientftfid, $cid, $name, $size, $cpw = "", $overwrite = FALSE, $resume = FALSE)
@@ -1681,7 +1681,7 @@ class  extends
 
     if(array_key_exists("status", $upload) && $upload["status"] != 0x00)
     {
-      throw new ($upload["msg"], $upload["status"]);
+      throw new Ts3Exception($upload["msg"], $upload["status"]);
     }
 
     $upload["cid"]  = $cid;
@@ -1698,7 +1698,7 @@ class  extends
       $upload["host"] = $upload["ip"];
     }
 
-    ::getInstance()->emit("filetransferUploadInit", $upload["ftkey"], $upload);
+    Signal::getInstance()->emit("filetransferUploadInit", $upload["ftkey"], $upload);
 
     return $upload;
   }
@@ -1711,7 +1711,7 @@ class  extends
    * @param  string  $name
    * @param  string  $cpw
    * @param  integer $seekpos
-   * @throws 
+   * @throws Ts3Exception
    * @return array
    */
   public function transferInitDownload($clientftfid, $cid, $name, $cpw = "", $seekpos = 0)
@@ -1720,7 +1720,7 @@ class  extends
 
     if(array_key_exists("status", $download) && $download["status"] != 0x00)
     {
-      throw new ($download["msg"], $download["status"]);
+      throw new Ts3Exception($download["msg"], $download["status"]);
     }
 
     $download["cid"]  = $cid;
@@ -1737,7 +1737,7 @@ class  extends
       $download["host"] = $download["ip"];
     }
 
-    ::getInstance()->emit("filetransferDownloadInit", $download["ftkey"], $download);
+    Signal::getInstance()->emit("filetransferDownloadInit", $download["ftkey"], $download);
 
     return $download;
   }
@@ -1768,7 +1768,7 @@ class  extends
   /**
    * Downloads and returns the servers icon file content.
    *
-   * @return 
+   * @return StringHelper
    */
   public function iconDownload()
   {
@@ -1915,15 +1915,15 @@ class  extends
     switch($mode)
     {
       case TeamSpeak3::SNAPSHOT_BASE64:
-        $data = ::fromBase64($data);
+        $data = StringHelper::fromBase64($data);
         break;
 
       case TeamSpeak3::SNAPSHOT_HEXDEC:
-        $data = ::fromHex($data);
+        $data = StringHelper::fromHex($data);
         break;
 
       default:
-        $data = ::factory($data);
+        $data = StringHelper::factory($data);
         break;
     }
 
@@ -1931,7 +1931,7 @@ class  extends
 
     if(isset($detail[0]["sid"]))
     {
-      ::getInstance()->emit("notifyServercreated", $this->getParent(), $detail[0]["sid"]);
+      Signal::getInstance()->emit("notifyServercreated", $this->getParent(), $detail[0]["sid"]);
 
       $server = array_shift($detail);
     }
@@ -2041,13 +2041,13 @@ class  extends
    * @param  integer $id2
    * @param  string  $description
    * @param  string  $customset
-   * @return 
+   * @return StringHelper
    */
   public function privilegeKeyCreate($type = TeamSpeak3::TOKEN_SERVERGROUP, $id1, $id2 = 0, $description = null, $customset = null)
   {
     $token = $this->execute("privilegekeyadd", array("tokentype" => $type, "tokenid1" => $id1, "tokenid2" => $id2, "tokendescription" => $description, "tokencustomset" => $customset))->toList();
 
-    ::getInstance()->emit("notifyTokencreated", $this, $token["token"]);
+    Signal::getInstance()->emit("notifyTokencreated", $this, $token["token"]);
 
     return $token["token"];
   }
@@ -2411,7 +2411,7 @@ class  extends
    * will be auto-generated.
    *
    * @param  string $username
-   * @return 
+   * @return StringHelper
    */
   public function selfUpdateLogin($username)
   {
@@ -2457,26 +2457,26 @@ class  extends
   /**
    * Internal callback funtion for sorting of client objects.
    *
-   * @param   $a
-   * @param   $b
+   * @param  Client $a
+   * @param  Client $b
    * @return integer
    */
-  protected static function sortClientList( $a,  $b)
+  protected static function sortClientList(Client $a, Client $b)
   {
     if(get_class($a) != get_class($b))
     {
       return 0;
 
       /* workaround for PHP bug #50688 */
-      throw new ("invalid parameter", 0x602);
+      throw new Ts3Exception("invalid parameter", 0x602);
     }
 
-    if(!$a instanceof )
+    if(!$a instanceof Client)
     {
       return 0;
 
       /* workaround for PHP bug #50688 */
-      throw new ("convert error", 0x604);
+      throw new Ts3Exception("convert error", 0x604);
     }
 
     if($a->getProperty("client_talk_power", 0) != $b->getProperty("client_talk_power", 0))
@@ -2495,26 +2495,26 @@ class  extends
   /**
    * Internal callback funtion for sorting of group objects.
    *
-   * @param   $a
-   * @param   $b
+   * @param  AbstractNode $a
+   * @param  AbstractNode $b
    * @return integer
    */
-  protected static function sortGroupList( $a,  $b)
+  protected static function sortGroupList(AbstractNode $a, AbstractNode $b)
   {
     if(get_class($a) != get_class($b))
     {
       return 0;
 
       /* workaround for PHP bug #50688 */
-      throw new ("invalid parameter", 0x602);
+      throw new Ts3Exception("invalid parameter", 0x602);
     }
 
-    if(!$a instanceof  && !$a instanceof group)
+    if(!$a instanceof Servergroup && !$a instanceof Channelgroup)
     {
       return 0;
 
       /* workaround for PHP bug #50688 */
-      throw new ("convert error", 0x604);
+      throw new Ts3Exception("convert error", 0x604);
     }
 
     if($a->getProperty("sortid", 0) != $b->getProperty("sortid", 0) && $a->getProperty("sortid", 0) != 0 && $b->getProperty("sortid", 0) != 0)
@@ -2538,7 +2538,7 @@ class  extends
     {
       return 0;
 
-      throw new ("invalid parameter", 0x602);
+      throw new Ts3Exception("invalid parameter", 0x602);
     }
     
     if($a["type"] != $b["type"])

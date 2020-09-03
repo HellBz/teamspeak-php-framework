@@ -27,10 +27,10 @@ namespace TeamSpeak3\Helper\Profiler;
 
 
 /**
- * @class _Timer
+ * @class Timer
  * @brief Helper class providing profiler timers.
  */
-class _Timer
+class Timer
 {
   /**
    * Indicates wether the timer is running or not.
@@ -61,10 +61,10 @@ class _Timer
   protected $data = array();
 
   /**
-   * The _Timer constructor.
+   * The Timer constructor.
    *
    * @param  string $name
-   * @return _Timer
+   * @return Timer
    */
   public function __construct($name)
   {

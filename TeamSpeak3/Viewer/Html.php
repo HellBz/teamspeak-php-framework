@@ -37,10 +37,10 @@ use TeamSpeak3\Node\Client;
 
 
 /**
- * @class 
+ * @class Html
  * @brief Renders nodes used in HTML-based TeamSpeak 3 viewers.
  */
-class  implements 
+class Html implements IViewer
 {
   /**
    * A pre-defined pattern used to display a node in a TeamSpeak 3 viewer.
@@ -50,14 +50,14 @@ class  implements
   protected $pattern = "<table id='%0' class='%1' summary='%2'><tr class='%3'><td class='%4'>%5</td><td class='%6' title='%7'>%8 %9</td><td class='%10'>%11%12</td></tr></table>\n";
 
   /**
-   * The  object which is currently processed.
+   * The AbstractNode object which is currently processed.
    *
-   * @var 
+   * @var AbstractNode
    */
   protected $currObj = null;
 
   /**
-   * An array filled with siblings for the  object which is currently
+   * An array filled with siblings for the AbstractNode object which is currently
    * processed.
    *
    * @var array
@@ -65,7 +65,7 @@ class  implements
   protected $currSib = null;
 
   /**
-   * An internal counter indicating the number of fetched  objects.
+   * An internal counter indicating the number of fetched AbstractNode objects.
    *
    * @var integer
    */
@@ -107,7 +107,7 @@ class  implements
   protected $remoteIcons = array();
 
   /**
-   * The  constructor.
+   * The Html constructor.
    *
    * @param  string $iconpath
    * @param  string $flagpath
@@ -130,11 +130,11 @@ class  implements
   /**
    * Returns the code needed to display a node in a TeamSpeak 3 viewer.
    *
-   * @param   $node
+   * @param  AbstractNode $node
    * @param  array $siblings
    * @return string
    */
-  public function fetchObject( $node, array $siblings = array())
+  public function fetchObject(AbstractNode $node, array $siblings = array())
   {
     $this->currObj = $node;
     $this->currSib = $siblings;
@@ -155,7 +155,7 @@ class  implements
       $this->getSuffixFlag(),
     );
 
-    return ::factory($this->pattern)->arg($args);
+    return StringHelper::factory($this->pattern)->arg($args);
   }
 
   /**
@@ -248,7 +248,7 @@ class  implements
   {
     $extras = "";
 
-    if($this->currObj instanceof  && $this->currObj->isSpacer())
+    if($this->currObj instanceof Channel && $this->currObj->isSpacer())
     {
       switch($this->currObj->spacerGetType())
       {
@@ -288,7 +288,7 @@ class  implements
           break;
       }
     }
-    elseif($this->currObj instanceof  && $this->currObj->client_is_recording)
+    elseif($this->currObj instanceof Client && $this->currObj->client_is_recording)
     {
       $extras .= " recording";
     }
@@ -304,21 +304,21 @@ class  implements
    */
   protected function getCorpusTitle()
   {
-    if($this->currObj instanceof )
+    if($this->currObj instanceof Server)
     {
-      return "ID: " . $this->currObj->getId() . " | Clients: " . $this->currObj->clientCount() . "/" . $this->currObj["virtualserver_maxclients"] . " | Uptime: " . ::seconds($this->currObj["virtualserver_uptime"]);
+      return "ID: " . $this->currObj->getId() . " | Clients: " . $this->currObj->clientCount() . "/" . $this->currObj["virtualserver_maxclients"] . " | Uptime: " . Convert::seconds($this->currObj["virtualserver_uptime"]);
     }
-    elseif($this->currObj instanceof  && !$this->currObj->isSpacer())
+    elseif($this->currObj instanceof Channel && !$this->currObj->isSpacer())
     {
-      return "ID: " . $this->currObj->getId() . " | Codec: " . ::codec($this->currObj["channel_codec"]) . " | Quality: " . $this->currObj["channel_codec_quality"];
+      return "ID: " . $this->currObj->getId() . " | Codec: " . Convert::codec($this->currObj["channel_codec"]) . " | Quality: " . $this->currObj["channel_codec_quality"];
     }
-    elseif($this->currObj instanceof )
+    elseif($this->currObj instanceof Client)
     {
-      return "ID: " . $this->currObj->getId() . " | Version: " . ::versionShort($this->currObj["client_version"]) . " | Platform: " . $this->currObj["client_platform"];
+      return "ID: " . $this->currObj->getId() . " | Version: " . Convert::versionShort($this->currObj["client_version"]) . " | Platform: " . $this->currObj["client_platform"];
     }
-    elseif($this->currObj instanceof  || $this->currObj instanceof group)
+    elseif($this->currObj instanceof Servergroup || $this->currObj instanceof Channelgroup)
     {
-      return "ID: " . $this->currObj->getId() . " | Type: " . ::groupType($this->currObj["type"]) . " (" . ($this->currObj["savedb"] ? "Permanent" : "Temporary") . ")";
+      return "ID: " . $this->currObj->getId() . " | Type: " . Convert::groupType($this->currObj["type"]) . " (" . ($this->currObj["savedb"] ? "Permanent" : "Temporary") . ")";
     }
   }
 
@@ -330,7 +330,7 @@ class  implements
    */
   protected function getCorpusIcon()
   {
-    if($this->currObj instanceof  && $this->currObj->isSpacer()) return;
+    if($this->currObj instanceof Channel && $this->currObj->isSpacer()) return;
 
     return $this->getImage($this->currObj->getIcon() . ".png");
   }
@@ -343,7 +343,7 @@ class  implements
    */
   protected function getCorpusName()
   {
-    if($this->currObj instanceof  && $this->currObj->isSpacer())
+    if($this->currObj instanceof Channel && $this->currObj->isSpacer())
     {
       if($this->currObj->spacerGetType() != TeamSpeak3::SPACER_CUSTOM) return;
 
@@ -357,7 +357,7 @@ class  implements
       return htmlspecialchars($string);
     }
 
-    if($this->currObj instanceof )
+    if($this->currObj instanceof Client)
     {
       $before = array();
       $behind = array();
@@ -407,15 +407,15 @@ class  implements
    */
   protected function getSuffixIcon()
   {
-    if($this->currObj instanceof )
+    if($this->currObj instanceof Server)
     {
       return $this->getSuffixIconServer();
     }
-    elseif($this->currObj instanceof )
+    elseif($this->currObj instanceof Channel)
     {
       return $this->getSuffixIconChannel();
     }
-    elseif($this->currObj instanceof )
+    elseif($this->currObj instanceof Client)
     {
       return $this->getSuffixIconClient();
     }
@@ -453,7 +453,7 @@ class  implements
 
         if($this->ftclient == "data:image")
         {
-          $html .= $this->getImage("data:" . ::imageMimeType($download) . ";base64," . base64_encode($download), "Server Icon", null, FALSE);
+          $html .= $this->getImage("data:" . Convert::imageMimeType($download) . ";base64," . base64_encode($download), "Server Icon", null, FALSE);
         }
         else
         {
@@ -477,7 +477,7 @@ class  implements
    */
   protected function getSuffixIconChannel()
   {
-    if($this->currObj instanceof  && $this->currObj->isSpacer()) return;
+    if($this->currObj instanceof Channel && $this->currObj->isSpacer()) return;
 
     $html = "";
 
@@ -523,7 +523,7 @@ class  implements
 
         if($this->ftclient == "data:image")
         {
-          $html .= $this->getImage("data:" . ::imageMimeType($download) . ";base64," . base64_encode($download), "Channel Icon", null, FALSE);
+          $html .= $this->getImage("data:" . Convert::imageMimeType($download) . ";base64," . base64_encode($download), "Channel Icon", null, FALSE);
         }
         else
         {
@@ -575,7 +575,7 @@ class  implements
     {
       if(!$group["iconid"]) continue;
 
-      $type = ($group instanceof ) ? "Server Group" : "Channel Group";
+      $type = ($group instanceof Servergroup) ? "Server Group" : "Channel Group";
 
       if(!$group->iconIsLocal("iconid") && $this->ftclient)
       {
@@ -597,7 +597,7 @@ class  implements
 
         if($this->ftclient == "data:image")
         {
-          $html .= $this->getImage("data:" . ::imageMimeType($download) . ";base64," . base64_encode($download), $group . " [" . $type . "]", null, FALSE);
+          $html .= $this->getImage("data:" . Convert::imageMimeType($download) . ";base64," . base64_encode($download), $group . " [" . $type . "]", null, FALSE);
         }
         else
         {
@@ -632,7 +632,7 @@ class  implements
 
         if($this->ftclient == "data:image")
         {
-          $html .= $this->getImage("data:" . ::imageMimeType($download) . ";base64," . base64_encode($download), "Client Icon", null, FALSE);
+          $html .= $this->getImage("data:" . Convert::imageMimeType($download) . ";base64," . base64_encode($download), "Client Icon", null, FALSE);
         }
         else
         {
@@ -656,7 +656,7 @@ class  implements
    */
   protected function getSuffixFlag()
   {
-    if(!$this->currObj instanceof ) return;
+    if(!$this->currObj instanceof Client) return;
 
     if($this->flagpath && $this->currObj["client_country"])
     {

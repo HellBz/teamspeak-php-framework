@@ -35,15 +35,15 @@ use ArrayAccess;
 
 
 /**
- * @class 
+ * @class Event
  * @brief Provides methods to analyze and format a ServerQuery event.
  */
-class  implements ArrayAccess
+class Event implements ArrayAccess
 {
   /**
    * Stores the event type.
    *
-   * @var 
+   * @var StringHelper
    */
   protected $type = null;
 
@@ -57,47 +57,47 @@ class  implements ArrayAccess
   /**
    * Stores the event data as an unparsed string.
    *
-   * @var 
+   * @var StringHelper
    */
   protected $mesg = null;
 
   /**
-   * Creates a new  object.
+   * Creates a new Event object.
    *
-   * @param   $evt
-   * @param       $con
-   * @throws 
-   * @return 
+   * @param  StringHelper $evt
+   * @param  Host     $con
+   * @throws Ts3Exception
+   * @return Event
    */
-  public function __construct( $evt,  $con = null)
+  public function __construct(StringHelper $evt, Host $con = null)
   {
     if(!$evt->startsWith(TeamSpeak3::EVENT))
     {
-      throw new ("invalid notification event format");
+      throw new Ts3Exception("invalid notification event format");
     }
 
     list($type, $data) = $evt->split(TeamSpeak3::SEPARATOR_CELL, 2);
 
     if(empty($data))
     {
-      throw new ("invalid notification event data");
+      throw new Ts3Exception("invalid notification event data");
     }
 
-    $fake = new (TeamSpeak3::ERROR . TeamSpeak3::SEPARATOR_CELL . "id" . TeamSpeak3::SEPARATOR_PAIR . 0 . TeamSpeak3::SEPARATOR_CELL . "msg" . TeamSpeak3::SEPARATOR_PAIR . "ok");
-    $repl = new (array($data, $fake), $type);
+    $fake = new StringHelper(TeamSpeak3::ERROR . TeamSpeak3::SEPARATOR_CELL . "id" . TeamSpeak3::SEPARATOR_PAIR . 0 . TeamSpeak3::SEPARATOR_CELL . "msg" . TeamSpeak3::SEPARATOR_PAIR . "ok");
+    $repl = new Reply(array($data, $fake), $type);
 
     $this->type = $type->substr(strlen(TeamSpeak3::EVENT));
     $this->data = $repl->toList();
     $this->mesg = $data;
 
-    ::getInstance()->emit("notifyEvent", $this, $con);
-    ::getInstance()->emit("notify" . ucfirst($this->type), $this, $con);
+    Signal::getInstance()->emit("notifyEvent", $this, $con);
+    Signal::getInstance()->emit("notify" . ucfirst($this->type), $this, $con);
   }
 
   /**
    * Returns the event type string.
    *
-   * @return 
+   * @return StringHelper
    */
   public function getType()
   {
@@ -117,7 +117,7 @@ class  implements ArrayAccess
   /**
    * Returns the event data as an unparsed string.
    *
-   * @return 
+   * @return StringHelper
    */
   public function getMessage()
   {
@@ -139,7 +139,7 @@ class  implements ArrayAccess
   {
     if(!$this->offsetExists($offset))
     {
-      throw new ("invalid parameter", 0x602);
+      throw new Ts3Exception("invalid parameter", 0x602);
     }
 
     return $this->data[$offset];
@@ -150,7 +150,7 @@ class  implements ArrayAccess
    */
   public function offsetSet($offset, $value)
   {
-    throw new ("event '" . $this->getType() . "' is read only");
+    throw new Ts3Exception("event '" . $this->getType() . "' is read only");
   }
 
   /**

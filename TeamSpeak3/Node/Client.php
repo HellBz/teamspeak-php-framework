@@ -30,28 +30,28 @@ use TeamSpeak3\TeamSpeak3;
 
 
 /**
- * @class 
+ * @class Client
  * @brief Class describing a TeamSpeak 3 client and all it's parameters.
  */
-class  extends 
+class Client extends AbstractNode
 {
   /**
-   * The  constructor.
+   * The Client constructor.
    *
-   * @param   $server
+   * @param  Server $server
    * @param  array  $info
    * @param  string $index
-   * @throws 
-   * @return 
+   * @throws Ts3Exception
+   * @return Client
    */
-  public function __construct( $server, array $info, $index = "clid")
+  public function __construct(Server $server, array $info, $index = "clid")
   {
     $this->parent = $server;
     $this->nodeInfo = $info;
 
     if(!array_key_exists($index, $this->nodeInfo))
     {
-      throw new ("invalid clientID", 0x200);
+      throw new Ts3Exception("invalid clientID", 0x200);
     }
 
     $this->nodeId = $this->nodeInfo[$index];
@@ -298,17 +298,17 @@ class  extends
   /**
    * Returns the possible name of the clients avatar.
    *
-   * @return 
+   * @return StringHelper
    */
   public function avatarGetName()
   {
-    return new ("/avatar_" . $this["client_base64HashClientUID"]);
+    return new StringHelper("/avatar_" . $this["client_base64HashClientUID"]);
   }
 
   /**
    * Downloads and returns the clients avatar file content.
    *
-   * @return 
+   * @return StringHelper
    */
   public function avatarDownload()
   {
@@ -393,7 +393,7 @@ class  extends
   /**
    * Downloads and returns the clients icon file content.
    *
-   * @return 
+   * @return StringHelper
    */
   public function iconDownload()
   {

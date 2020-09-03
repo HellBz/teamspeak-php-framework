@@ -23,17 +23,21 @@
  */
 
         
-namespace TeamSpeak3;
+namespace TeamSpeak3\Adapter;
 
-use TeamSpeak3\Helper\Signal;
-use TeamSpeak3\Helper\StringHelper;
+use TeamSpeak3\Ts3Exception;
+use TeamSpeak3\Transport\TCP;
+use TeamSpeak3\Transport\UDP;
+use TeamSpeak3\Transport\AbstractTransport;
+use TeamSpeak3\Helper\Profiler;
+use TeamSpeak3\Helper\Profiler\Timer;
 
 
 /**
- * @class 
+ * @class AbstractAdapter
  * @brief Provides low-level methods for concrete adapters to communicate with a TeamSpeak 3 Server.
  */
-abstract class 
+abstract class AbstractAdapter
 {
   /**
    * Stores user-provided options.
@@ -43,17 +47,17 @@ abstract class
   protected $options = null;
 
   /**
-   * Stores an  object.
+   * Stores an AbstractTransport object.
    *
-   * @var 
+   * @var AbstractTransport
    */
   protected $transport = null;
 
   /**
-   * The  constructor.
+   * The AbstractAdapter constructor.
    *
    * @param  array $options
-   * @return 
+   * @return AbstractAdapter
    */
   public function __construct(array $options)
   {
@@ -66,17 +70,17 @@ abstract class
   }
 
   /**
-   * The  destructor.
+   * The AbstractAdapter destructor.
    *
    * @return void
    */
   abstract public function __destruct();
 
   /**
-   * Connects the  object and performs initial actions on the remote
+   * Connects the AbstractTransport object and performs initial actions on the remote
    * server.
    *
-   * @throws 
+   * @throws Ts3Exception
    * @return void
    */
   abstract protected function syn();
@@ -104,17 +108,17 @@ abstract class
   /**
    * Returns the profiler timer used for this connection adapter.
    *
-   * @return _Timer
+   * @return Timer
    */
   public function getProfiler()
   {
-    return ::get(spl_object_hash($this));
+    return Profiler::get(spl_object_hash($this));
   }
 
   /**
    * Returns the transport object used for this connection adapter.
    *
-   * @return 
+   * @return AbstractTransport
    */
   public function getTransport()
   {
@@ -127,21 +131,24 @@ abstract class
    *
    * @param  array  $options
    * @param  string $transport
-   * @throws 
+   * @throws Ts3Exception
    * @return void
    */
-  protected function initTransport($options, $transport = "")
+  protected function initTransport($options, $transport = "TCP")
   {
     if(!is_array($options))
     {
-      throw new ("transport parameters must provided in an array");
+      throw new Ts3Exception("transport parameters must provided in an array");
     }
 
-    $this->transport = new $transport($options);
+    if($transport == "TCP")
+      $this->transport = new TCP($options);
+    else
+      $this->transport = new UDP($options);
   }
 
   /**
-   * Returns the hostname or IPv4 address the underlying  object
+   * Returns the hostname or IPv4 address the underlying AbstractTransport object
    * is connected to.
    *
    * @return string
@@ -152,7 +159,7 @@ abstract class
   }
 
   /**
-   * Returns the port number of the server the underlying  object
+   * Returns the port number of the server the underlying AbstractTransport object
    * is connected to.
    *
    * @return string

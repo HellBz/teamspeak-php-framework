@@ -35,29 +35,29 @@ use TeamSpeak3\Node\Server;
 
 
 /**
- * @class _Interface
- * @brief Interface class describing the layout for  callbacks.
+ * @class ISignal
+ * @brief Interface class describing the layout for Signal callbacks.
  */
-interface _Interface
+interface ISignal
 {
   /**
    * Possible callback for '<adapter>Connected' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("serverqueryConnected", array($object, "onConnect"));
-   *   - ::getInstance()->subscribe("filetransferConnected", array($object, "onConnect"));
+   *   - Signal::getInstance()->subscribe("serverqueryConnected", array($object, "onConnect"));
+   *   - Signal::getInstance()->subscribe("filetransferConnected", array($object, "onConnect"));
    *
-   * @param   $adapter
+   * @param  AbstractAdapter $adapter
    * @return void
    */
-  public function onConnect( $adapter);
+  public function onConnect(AbstractAdapter $adapter);
 
   /**
    * Possible callback for '<adapter>Disconnected' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("serverqueryDisconnected", array($object, "onDisconnect"));
-   *   - ::getInstance()->subscribe("filetransferDisconnected", array($object, "onDisconnect"));
+   *   - Signal::getInstance()->subscribe("serverqueryDisconnected", array($object, "onDisconnect"));
+   *   - Signal::getInstance()->subscribe("filetransferDisconnected", array($object, "onDisconnect"));
    *
    * @return void
    */
@@ -67,7 +67,7 @@ interface _Interface
    * Possible callback for 'serverqueryCommandStarted' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("serverqueryCommandStarted", array($object, "onCommandStarted"));
+   *   - Signal::getInstance()->subscribe("serverqueryCommandStarted", array($object, "onCommandStarted"));
    *
    * @param  string $cmd
    * @return void
@@ -78,157 +78,157 @@ interface _Interface
    * Possible callback for 'serverqueryCommandFinished' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("serverqueryCommandFinished", array($object, "onCommandFinished"));
+   *   - Signal::getInstance()->subscribe("serverqueryCommandFinished", array($object, "onCommandFinished"));
    *
    * @param  string $cmd
-   * @param   $reply
+   * @param  Reply $reply
    * @return void
    */
-  public function onCommandFinished($cmd,  $reply);
+  public function onCommandFinished($cmd, Reply $reply);
 
   /**
    * Possible callback for 'notifyEvent' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("notifyEvent", array($object, "onEvent"));
+   *   - Signal::getInstance()->subscribe("notifyEvent", array($object, "onEvent"));
    *
-   * @param   $event
-   * @param   $host
+   * @param  Event $event
+   * @param  Host $host
    * @return void
    */
-  public function onEvent( $event,  $host);
+  public function onEvent(Event $event, Host $host);
 
   /**
    * Possible callback for 'notifyError' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("notifyError", array($object, "onError"));
+   *   - Signal::getInstance()->subscribe("notifyError", array($object, "onError"));
    *
-   * @param   $reply
+   * @param  Reply $reply
    * @return void
    */
-  public function onError( $reply);
+  public function onError(Reply $reply);
 
   /**
    * Possible callback for 'notifyServerselected' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("notifyServerselected", array($object, "onServerselected"));
+   *   - Signal::getInstance()->subscribe("notifyServerselected", array($object, "onServerselected"));
    *
-   * @param   $host
+   * @param  Host $host
    * @return void
    */
-  public function onServerselected( $host);
+  public function onServerselected(Host $host);
 
   /**
    * Possible callback for 'notifyServercreated' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("notifyServercreated", array($object, "onServercreated"));
+   *   - Signal::getInstance()->subscribe("notifyServercreated", array($object, "onServercreated"));
    *
-   * @param   $host
+   * @param  Host $host
    * @param  integer $sid
    * @return void
    */
-  public function onServercreated( $host, $sid);
+  public function onServercreated(Host $host, $sid);
 
   /**
    * Possible callback for 'notifyServerdeleted' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("notifyServerdeleted", array($object, "onServerdeleted"));
+   *   - Signal::getInstance()->subscribe("notifyServerdeleted", array($object, "onServerdeleted"));
    *
-   * @param   $host
+   * @param  Host $host
    * @param  integer $sid
    * @return void
    */
-  public function onServerdeleted( $host, $sid);
+  public function onServerdeleted(Host $host, $sid);
 
   /**
    * Possible callback for 'notifyServerstarted' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("notifyServerstarted", array($object, "onServerstarted"));
+   *   - Signal::getInstance()->subscribe("notifyServerstarted", array($object, "onServerstarted"));
    *
-   * @param   $host
+   * @param  Host $host
    * @param  integer $sid
    * @return void
    */
-  public function onServerstarted( $host, $sid);
+  public function onServerstarted(Host $host, $sid);
 
   /**
    * Possible callback for 'notifyServerstopped' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("notifyServerstopped", array($object, "onServerstopped"));
+   *   - Signal::getInstance()->subscribe("notifyServerstopped", array($object, "onServerstopped"));
    *
-   * @param   $host
+   * @param  Host $host
    * @param  integer $sid
    * @return void
    */
-  public function onServerstopped( $host, $sid);
+  public function onServerstopped(Host $host, $sid);
 
   /**
    * Possible callback for 'notifyServershutdown' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("notifyServershutdown", array($object, "onServershutdown"));
+   *   - Signal::getInstance()->subscribe("notifyServershutdown", array($object, "onServershutdown"));
    *
-   * @param   $host
+   * @param  Host $host
    * @return void
    */
-  public function onServershutdown( $host);
+  public function onServershutdown(Host $host);
 
   /**
    * Possible callback for 'notifyLogin' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("notifyLogin", array($object, "onLogin"));
+   *   - Signal::getInstance()->subscribe("notifyLogin", array($object, "onLogin"));
    *
-   * @param   $host
+   * @param  Host $host
    * @return void
    */
-  public function onLogin( $host);
+  public function onLogin(Host $host);
 
   /**
    * Possible callback for 'notifyLogout' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("notifyLogout", array($object, "onLogout"));
+   *   - Signal::getInstance()->subscribe("notifyLogout", array($object, "onLogout"));
    *
-   * @param   $host
+   * @param  Host $host
    * @return void
    */
-  public function onLogout( $host);
+  public function onLogout(Host $host);
 
   /**
    * Possible callback for 'notifyTokencreated' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("notifyTokencreated", array($object, "onTokencreated"));
+   *   - Signal::getInstance()->subscribe("notifyTokencreated", array($object, "onTokencreated"));
    *
-   * @param   $server
+   * @param  Server $server
    * @param  string $token
    * @return void
    */
-  public function onTokencreated( $server, $token);
+  public function onTokencreated(Server $server, $token);
 
   /**
    * Possible callback for 'filetransferHandshake' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("filetransferHandshake", array($object, "onFtHandshake"));
+   *   - Signal::getInstance()->subscribe("filetransferHandshake", array($object, "onFtHandshake"));
    *
-   * @param   $adapter
+   * @param  FileTransfer $adapter
    * @return void
    */
-  public function onFtHandshake( $adapter);
+  public function onFtHandshake(FileTransfer $adapter);
 
   /**
    * Possible callback for 'filetransferUploadStarted' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("filetransferUploadStarted", array($object, "onFtUploadStarted"));
+   *   - Signal::getInstance()->subscribe("filetransferUploadStarted", array($object, "onFtUploadStarted"));
    *
    * @param  string  $ftkey
    * @param  integer $seek
@@ -241,7 +241,7 @@ interface _Interface
    * Possible callback for 'filetransferUploadProgress' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("filetransferUploadProgress", array($object, "onFtUploadProgress"));
+   *   - Signal::getInstance()->subscribe("filetransferUploadProgress", array($object, "onFtUploadProgress"));
    *
    * @param  string  $ftkey
    * @param  integer $seek
@@ -254,7 +254,7 @@ interface _Interface
    * Possible callback for 'filetransferUploadFinished' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("filetransferUploadFinished", array($object, "onFtUploadFinished"));
+   *   - Signal::getInstance()->subscribe("filetransferUploadFinished", array($object, "onFtUploadFinished"));
    *
    * @param  string  $ftkey
    * @param  integer $seek
@@ -267,7 +267,7 @@ interface _Interface
    * Possible callback for 'filetransferDownloadStarted' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("filetransferDownloadStarted", array($object, "onFtDownloadStarted"));
+   *   - Signal::getInstance()->subscribe("filetransferDownloadStarted", array($object, "onFtDownloadStarted"));
    *
    * @param  string  $ftkey
    * @param  integer $buff
@@ -280,7 +280,7 @@ interface _Interface
    * Possible callback for 'filetransferDownloadProgress' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("filetransferDownloadProgress", array($object, "onFtDownloadProgress"));
+   *   - Signal::getInstance()->subscribe("filetransferDownloadProgress", array($object, "onFtDownloadProgress"));
    *
    * @param  string  $ftkey
    * @param  integer $buff
@@ -293,7 +293,7 @@ interface _Interface
    * Possible callback for 'filetransferDownloadFinished' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("filetransferDownloadFinished", array($object, "onFtDownloadFinished"));
+   *   - Signal::getInstance()->subscribe("filetransferDownloadFinished", array($object, "onFtDownloadFinished"));
    *
    * @param  string  $ftkey
    * @param  integer $buff
@@ -306,8 +306,8 @@ interface _Interface
    * Possible callback for '<adapter>DataRead' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("serverqueryDataRead", array($object, "onDebugDataRead"));
-   *   - ::getInstance()->subscribe("filetransferDataRead", array($object, "onDebugDataRead"));
+   *   - Signal::getInstance()->subscribe("serverqueryDataRead", array($object, "onDebugDataRead"));
+   *   - Signal::getInstance()->subscribe("filetransferDataRead", array($object, "onDebugDataRead"));
    *
    * @param  string $data
    * @return void
@@ -318,8 +318,8 @@ interface _Interface
    * Possible callback for '<adapter>DataSend' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("serverqueryDataSend", array($object, "onDebugDataSend"));
-   *   - ::getInstance()->subscribe("filetransferDataSend", array($object, "onDebugDataSend"));
+   *   - Signal::getInstance()->subscribe("serverqueryDataSend", array($object, "onDebugDataSend"));
+   *   - Signal::getInstance()->subscribe("filetransferDataSend", array($object, "onDebugDataSend"));
    *
    * @param  string $data
    * @return void
@@ -330,23 +330,23 @@ interface _Interface
    * Possible callback for '<adapter>WaitTimeout' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("serverqueryWaitTimeout", array($object, "onWaitTimeout"));
-   *   - ::getInstance()->subscribe("filetransferWaitTimeout", array($object, "onWaitTimeout"));
+   *   - Signal::getInstance()->subscribe("serverqueryWaitTimeout", array($object, "onWaitTimeout"));
+   *   - Signal::getInstance()->subscribe("filetransferWaitTimeout", array($object, "onWaitTimeout"));
    *
    * @param  integer $time
-   * @param   $adapter
+   * @param  AbstractAdapter $adapter
    * @return void
    */
-  public function onWaitTimeout($time,  $adapter);
+  public function onWaitTimeout($time, AbstractAdapter $adapter);
 
   /**
    * Possible callback for 'errorException' signals.
    *
    * === Examples ===
-   *   - ::getInstance()->subscribe("errorException", array($object, "onException"));
+   *   - Signal::getInstance()->subscribe("errorException", array($object, "onException"));
    *
-   * @param   $e
+   * @param  Ts3Exception $e
    * @return void
    */
-  public function onException( $e);
+  public function onException(Ts3Exception $e);
 }
