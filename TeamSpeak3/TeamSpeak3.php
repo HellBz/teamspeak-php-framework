@@ -84,7 +84,7 @@ class TeamSpeak3
   /**
    * TeamSpeak 3 PHP Framework version.
    */
-  const LIB_VERSION = "1.1.35";
+  const LIB_VERSION = "1.1.34";
 
   /*@
    * TeamSpeak 3 protocol separators.
@@ -93,13 +93,6 @@ class TeamSpeak3
   const SEPARATOR_LIST = "|";  //!< protocol list separator
   const SEPARATOR_CELL = " ";  //!< protocol cell separator
   const SEPARATOR_PAIR = "=";  //!< protocol pair separator
-
-  /*@
-   * TeamSpeak 3 API key scopes.
-   */
-  const APIKEY_MANAGE = "manage";  //!< allow access to administrative calls
-  const APIKEY_WRITE  = "write";   //!< allow access to read and write calls
-  const APIKEY_READ   = "read";    //!< allow access to read-only calls
 
   /*@
    * TeamSpeak 3 log levels.
@@ -352,7 +345,7 @@ class TeamSpeak3
     $adapter = self::getAdapterName($uri->getScheme());
     $options = array("host" => $uri->getHost(), "port" => $uri->getPort(), "timeout" => (int) $uri->getQueryVar("timeout", 10), "blocking" => (int) $uri->getQueryVar("blocking", 1), "tls" => (int) $uri->getQueryVar("tls", 0), "ssh" => (int) $uri->getQueryVar("ssh", 0));
 
-    self::loadClass($adapter);
+    //self::loadClass($adapter);
 
     if($options["ssh"])
     {
@@ -461,6 +454,7 @@ class TeamSpeak3
    * @throws LogicException
    * @return boolean
    */
+/* 
   protected static function loadClass($class)
   {
     if(class_exists($class, FALSE) || interface_exists($class, FALSE))
@@ -486,7 +480,8 @@ class TeamSpeak3
     }
 
     return include_once($file);
-  }
+  } 
+*/
 
   /**
    * Generates a possible file path for $name.
@@ -499,7 +494,7 @@ class TeamSpeak3
     $path = str_replace("_", DIRECTORY_SEPARATOR, $name);
     $path = str_replace(__CLASS__, dirname(__FILE__), $path);
 
-    return $path;
+    return __DIR__."/".$name;
   }
 
   /**
@@ -510,7 +505,7 @@ class TeamSpeak3
    * @throws Ts3Exception
    * @return string
    */
-  protected static function getAdapterName($name, $namespace = "TeamSpeak3_Adapter_")
+  protected static function getAdapterName($name, $namespace = "Adapter/")
   {
     $path = self::getFilePath($namespace);
     $scan = scandir($path);
@@ -521,7 +516,7 @@ class TeamSpeak3
 
       if($file->startsWith($name) && $file->endsWith(".php"))
       {
-        return $namespace . str_replace(".php", "", $node);
+        return str_replace(".php", "", "TeamSpeak3\\Adapter\\" . $node);
       }
     }
 
@@ -534,7 +529,8 @@ class TeamSpeak3
    * @param  string $class
    * @return boolean
    */
-  public static function autoload($class)
+/*
+   public static function autoload($class)
   {
     if(substr($class, 0, strlen(__CLASS__)) != __CLASS__) return;
 
@@ -548,7 +544,8 @@ class TeamSpeak3
     {
       return FALSE;
     }
-  }
+  } 
+  */
 
   /**
    * Checks for required PHP features, enables autoloading and starts a default profiler.
@@ -573,10 +570,10 @@ class TeamSpeak3
       throw new LogicException("autoload functions are not available in this PHP installation");
     }
 
-    if(!class_exists("Profiler"))
+/*     if(!class_exists("Profiler"))
     {
       spl_autoload_register(array(__CLASS__, "autoload"));
-    }
+    } */
 
     Profiler::start();
   }

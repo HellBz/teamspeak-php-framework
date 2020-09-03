@@ -141,7 +141,10 @@ abstract class AbstractAdapter
       throw new Ts3Exception("transport parameters must provided in an array");
     }
 
-    $this->transport = new $transport($options);
+    if($transport == "TCP")
+      $this->transport = new TCP($options);
+    else
+      $this->transport = new UDP($options);
   }
 
   /**
