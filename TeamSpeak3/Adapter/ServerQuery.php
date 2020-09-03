@@ -30,6 +30,7 @@ use TeamSpeak3\Ts3Exception;
 use TeamSpeak3\Adapter\ServerQuery\Event;
 use TeamSpeak3\Adapter\ServerQuery\Reply;
 use TeamSpeak3\Node\Host;
+use TeamSpeak3\Node\AbstractNode;
 use TeamSpeak3\Helper\Profiler;
 use TeamSpeak3\Helper\Signal;
 use TeamSpeak3\Transport\AbstractTransport;

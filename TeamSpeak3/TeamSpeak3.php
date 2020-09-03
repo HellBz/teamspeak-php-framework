@@ -84,7 +84,7 @@ class TeamSpeak3
   /**
    * TeamSpeak 3 PHP Framework version.
    */
-  const LIB_VERSION = "1.1.34";
+  const LIB_VERSION = "1.1.35";
 
   /*@
    * TeamSpeak 3 protocol separators.
@@ -93,6 +93,13 @@ class TeamSpeak3
   const SEPARATOR_LIST = "|";  //!< protocol list separator
   const SEPARATOR_CELL = " ";  //!< protocol cell separator
   const SEPARATOR_PAIR = "=";  //!< protocol pair separator
+
+  /*@
+   * TeamSpeak 3 API key scopes.
+   */
+  const APIKEY_MANAGE = "manage";  //!< allow access to administrative calls
+  const APIKEY_WRITE  = "write";   //!< allow access to read and write calls
+  const APIKEY_READ   = "read";    //!< allow access to read-only calls
 
   /*@
    * TeamSpeak 3 log levels.
@@ -454,7 +461,7 @@ class TeamSpeak3
    * @throws LogicException
    * @return boolean
    */
-/* 
+/*
   protected static function loadClass($class)
   {
     if(class_exists($class, FALSE) || interface_exists($class, FALSE))
@@ -480,7 +487,7 @@ class TeamSpeak3
     }
 
     return include_once($file);
-  } 
+  }
 */
 
   /**
@@ -529,8 +536,7 @@ class TeamSpeak3
    * @param  string $class
    * @return boolean
    */
-/*
-   public static function autoload($class)
+/* public static function autoload($class)
   {
     if(substr($class, 0, strlen(__CLASS__)) != __CLASS__) return;
 
@@ -542,10 +548,10 @@ class TeamSpeak3
     }
     catch(Exception $e)
     {
-      return FALSE;
+      return FALSE; 
     }
-  } 
-  */
+  }
+*/
 
   /**
    * Checks for required PHP features, enables autoloading and starts a default profiler.
@@ -570,10 +576,11 @@ class TeamSpeak3
       throw new LogicException("autoload functions are not available in this PHP installation");
     }
 
-/*     if(!class_exists("Profiler"))
+/*  if(!class_exists("Profiler"))
     {
       spl_autoload_register(array(__CLASS__, "autoload"));
-    } */
+    }
+*/
 
     Profiler::start();
   }
